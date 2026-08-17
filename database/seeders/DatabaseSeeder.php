@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RulesetSeeder::class,
+            AbilitySeeder::class,
+            SkillSeeder::class,
         ]);
 
         $user = User::firstOrNew([
