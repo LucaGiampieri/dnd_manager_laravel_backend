@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Ruleset extends Model
 {
@@ -20,5 +22,23 @@ class Ruleset extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    public function sourceBooks(): HasMany
+    {
+        return $this->hasMany(SourceBook::class);
+    }
+
+    public function conditions(): HasMany
+    {
+        return $this->hasMany(Condition::class);
+    }
+
+    public function effectDefinitions(): MorphMany
+    {
+        return $this->morphMany(
+            EffectDefinition::class,
+            'source'
+        );
     }
 }
