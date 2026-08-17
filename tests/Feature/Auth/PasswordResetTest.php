@@ -36,3 +36,27 @@ test('password can be reset with valid token', function () {
         return true;
     });
 });
+
+test('il link di recupero password punta al frontend', function () {
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $this->post('/forgot-password', [
+        'email' => $user->email,
+    ]);
+
+    Notification::assertSentTo(
+        $user,
+        ResetPassword::class,
+        function (ResetPassword $notification) use ($user) {
+            $url = $notification->toMail($user)->actionUrl;
+
+            expect($url)
+                ->toStartWith(config('app.frontend_url').'/password-reset/')
+                ->toContain('email='.$user->email);
+
+            return true;
+        }
+    );
+});
