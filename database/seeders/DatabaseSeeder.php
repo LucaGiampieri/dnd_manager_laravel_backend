@@ -20,6 +20,11 @@ class DatabaseSeeder extends Seeder
             SizeSeeder::class,
             MovementTypeSeeder::class,
             MovementCostRuleSeeder::class,
+            SpellSchoolSeeder::class,
+            CurrencySeeder::class,
+            SenseSeeder::class,
+            LanguageSeeder::class,
+            CreatureTypeSeeder::class,
             DamageTypeSeeder::class,
             ConditionSeeder::class,
         ]);
