@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EffectDefinitionMovementCostModifier extends Model
 {
+    use HasSourceReferences;
+
     protected $fillable = [
         'effect_definition_id',
         'key',

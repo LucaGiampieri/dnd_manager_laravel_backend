@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             SenseSeeder::class,
             LanguageSeeder::class,
             CreatureTypeSeeder::class,
+            CreatureTagSeeder::class,
             DamageTypeSeeder::class,
             ConditionSeeder::class,
         ]);

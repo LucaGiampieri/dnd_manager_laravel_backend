@@ -5,22 +5,22 @@ namespace App\Models;
 use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
 
-class Size extends Model
+class CreatureTag extends Model
 {
     use HasSourceReferences;
 
     protected $fillable = [
+        'key',
         'name',
-        'sort_order',
-        'space_side_meters',
         'description',
+        'notes',
+        'sort_order',
     ];
 
     protected function casts(): array
     {
         return [
             'sort_order' => 'integer',
-            'space_side_meters' => 'decimal:3',
         ];
     }
 }

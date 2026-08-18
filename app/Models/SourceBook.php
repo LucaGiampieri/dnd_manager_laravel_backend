@@ -40,4 +40,24 @@ class SourceBook extends Model
         return $this->belongsTo(Ruleset::class);
     }
 
+    public function sourceReferences(): HasMany
+    {
+        return $this->hasMany(SourceReference::class);
+    }
+
+    public function outgoingSourceBookRelations(): HasMany
+    {
+        return $this->hasMany(
+            SourceBookRelation::class,
+            'source_book_id'
+        );
+    }
+
+    public function incomingSourceBookRelations(): HasMany
+    {
+        return $this->hasMany(
+            SourceBookRelation::class,
+            'related_source_book_id'
+        );
+    }
 }

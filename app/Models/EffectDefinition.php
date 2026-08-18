@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class EffectDefinition extends Model
 {
+    use HasSourceReferences;
+
     protected $fillable = [
         'key',
         'name',
