@@ -7,9 +7,12 @@ use Illuminate\Database\Seeder;
 
 class SkillSeeder extends Seeder
 {
+    //Inserisce le diciotto abilità e le collega alle caratteristiche
     public function run(): void
     {
+        //Raggruppa le abilità tramite l'abbreviazione della caratteristica
         $skillsByAbility = [
+            //Abilità basate sulla Forza
             'FOR' => [
                 [
                     'name' => 'Atletica',
@@ -17,6 +20,7 @@ class SkillSeeder extends Seeder
                 ],
             ],
 
+            //Abilità basate sulla Destrezza
             'DES' => [
                 [
                     'name' => 'Acrobazia',
@@ -32,6 +36,7 @@ class SkillSeeder extends Seeder
                 ],
             ],
 
+            //Abilità basate sull'Intelligenza
             'INT' => [
                 [
                     'name' => 'Arcano',
@@ -55,6 +60,7 @@ class SkillSeeder extends Seeder
                 ],
             ],
 
+            //Abilità basate sulla Saggezza
             'SAG' => [
                 [
                     'name' => 'Addestrare Animali',
@@ -78,6 +84,7 @@ class SkillSeeder extends Seeder
                 ],
             ],
 
+            //Abilità basate sul Carisma
             'CAR' => [
                 [
                     'name' => 'Inganno',
@@ -98,15 +105,22 @@ class SkillSeeder extends Seeder
             ],
         ];
 
+        //Esamina ogni gruppo di abilità
         foreach ($skillsByAbility as $shortName => $skills) {
-            $ability = Ability::where('short_name', $shortName)
+            //Recupera la caratteristica tramite l'abbreviazione
+            $ability = Ability::query()
+                ->where('short_name', $shortName)
                 ->firstOrFail();
 
+            //Inserisce o aggiorna le abilità della caratteristica
             foreach ($skills as $skill) {
                 $ability->skills()->updateOrCreate(
+                    //Identifica l'abilità tramite il nome
                     [
                         'name' => $skill['name'],
                     ],
+
+                    //Inserisce o aggiorna tutti i dati
                     $skill
                 );
             }

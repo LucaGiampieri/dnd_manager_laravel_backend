@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Language extends Model
 {
+    //Aggiunge riferimenti ai manuali e relazioni con altri contenuti
     use HasSourceReferences;
 
+    //Campi che possono essere valorizzati tramite create o update
     protected $fillable = [
         'key',
         'name',
@@ -26,6 +28,7 @@ class Language extends Model
         'sort_order',
     ];
 
+    //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {
         return [
@@ -36,11 +39,15 @@ class Language extends Model
         ];
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //ogni lingua può utilizzare un solo alfabeto principale
     public function languageScript(): BelongsTo
     {
         return $this->belongsTo(LanguageScript::class);
     }
 
+    //Relazione ricorsiva molti-a-uno (BelongsTo):
+    //ogni dialetto può appartenere a una lingua principale
     public function parentLanguage(): BelongsTo
     {
         return $this->belongsTo(
@@ -49,6 +56,8 @@ class Language extends Model
         );
     }
 
+    //Relazione ricorsiva uno-a-molti (HasMany):
+    //una lingua principale può avere molti dialetti
     public function dialects(): HasMany
     {
         return $this->hasMany(

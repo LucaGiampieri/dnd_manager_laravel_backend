@@ -2,8 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 
+//Rotta GET /:
+//restituisce il nome del framework e la versione installata
 Route::get('/', function () {
-    return ['Laravel' => app()->version()];
+    return [
+        'Laravel' => app()->version(),
+    ];
 });
 
-require __DIR__.'/auth.php';
+//Carica le rotte web dedicate
+//a registrazione, autenticazione e verifica email
+require __DIR__ . '/auth.php';

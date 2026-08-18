@@ -1,10 +1,12 @@
 <?php
 
-use App\Models\Concerns\HasContentRelations;
 use App\Models\Ability;
+use App\Models\Alignment;
 use App\Models\Condition;
 use App\Models\ConditionLevel;
+use App\Models\Concerns\HasContentRelations;
 use App\Models\Concerns\HasSourceReferences;
+use App\Models\CreatureStatBlock;
 use App\Models\CreatureTag;
 use App\Models\CreatureType;
 use App\Models\Currency;
@@ -21,14 +23,17 @@ use App\Models\Skill;
 use App\Models\Spell;
 use App\Models\SpellSchool;
 use App\Models\Subclass;
-use App\Models\Alignment;
-use App\Models\CreatureStatBlock;
+use App\Models\CharacterClass;
 
+//Verifica che tutti i contenuti ufficiali usino i trait condivisi
 it('i contenuti del regolamento possono avere riferimenti alle fonti', function () {
+    //Elenca tutti i modelli che rappresentano contenuti ufficiali
     $models = [
         Ability::class,
+        Alignment::class,
         Condition::class,
         ConditionLevel::class,
+        CreatureStatBlock::class,
         CreatureTag::class,
         CreatureType::class,
         Currency::class,
@@ -44,26 +49,31 @@ it('i contenuti del regolamento possono avere riferimenti alle fonti', function 
         Skill::class,
         Spell::class,
         SpellSchool::class,
+        CharacterClass::class,
         Subclass::class,
-        Alignment::class,
-        CreatureStatBlock::class,
     ];
 
+    //Controlla separatamente ogni modello ufficiale
     foreach ($models as $model) {
+        //Recupera anche i trait utilizzati attraverso altri trait
+        $usedTraits = class_uses_recursive($model);
+
+        //Verifica la presenza dei riferimenti ai manuali
         expect(
             in_array(
                 HasSourceReferences::class,
-                class_uses_recursive($model),
+                $usedTraits,
                 true
             )
         )->toBeTrue(
             "{$model} deve usare il trait HasSourceReferences."
         );
 
+        //Verifica la presenza delle relazioni tra contenuti
         expect(
             in_array(
                 HasContentRelations::class,
-                class_uses_recursive($model),
+                $usedTraits,
                 true
             )
         )->toBeTrue(

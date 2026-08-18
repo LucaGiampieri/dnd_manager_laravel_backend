@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class SourceReference extends Model
 {
+    //Campi che possono essere valorizzati tramite create o update
     protected $fillable = [
         'source_book_id',
         'key',
@@ -21,6 +22,7 @@ class SourceReference extends Model
         'official_text',
     ];
 
+    //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {
         return [
@@ -31,11 +33,15 @@ class SourceReference extends Model
         ];
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //ogni riferimento appartiene a un solo manuale
     public function sourceBook(): BelongsTo
     {
         return $this->belongsTo(SourceBook::class);
     }
 
+    //Relazione polimorfica molti-a-uno (MorphTo):
+    //ogni riferimento appartiene a un contenuto di tipo variabile
     public function sourceable(): MorphTo
     {
         return $this->morphTo();

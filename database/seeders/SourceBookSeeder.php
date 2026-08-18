@@ -7,12 +7,17 @@ use Illuminate\Database\Seeder;
 
 class SourceBookSeeder extends Seeder
 {
+    //Inserisce i tre manuali fondamentali del regolamento
     public function run(): void
     {
-        $ruleset = Ruleset::where('key', 'dnd5e_2014')
+        //Recupera il regolamento a cui appartengono i manuali
+        $ruleset = Ruleset::query()
+            ->where('key', 'dnd5e_2014')
             ->firstOrFail();
 
+        //Definisce i manuali fondamentali in lingua italiana
         $sourceBooks = [
+            //Manuale del Giocatore
             [
                 'title' => 'Manuale del Giocatore',
                 'original_title' => 'Player’s Handbook',
@@ -25,6 +30,8 @@ class SourceBookSeeder extends Seeder
                 'is_playtest' => false,
                 'is_active' => true,
             ],
+
+            //Guida del Dungeon Master
             [
                 'title' => 'Guida del Dungeon Master',
                 'original_title' => 'Dungeon Master’s Guide',
@@ -37,6 +44,8 @@ class SourceBookSeeder extends Seeder
                 'is_playtest' => false,
                 'is_active' => true,
             ],
+
+            //Manuale dei Mostri
             [
                 'title' => 'Manuale dei Mostri',
                 'original_title' => 'Monster Manual',
@@ -51,11 +60,15 @@ class SourceBookSeeder extends Seeder
             ],
         ];
 
+        //Inserisce o aggiorna ogni manuale usando lo slug stabile
         foreach ($sourceBooks as $sourceBook) {
             $ruleset->sourceBooks()->updateOrCreate(
+                //Identifica univocamente il manuale
                 [
                     'slug' => $sourceBook['slug'],
                 ],
+
+                //Inserisce o aggiorna tutti i dati del manuale
                 $sourceBook
             );
         }

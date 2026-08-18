@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SourceBook extends Model
 {
+    //Campi che possono essere valorizzati tramite create o update
     protected $fillable = [
         'ruleset_id',
         'title',
@@ -25,6 +26,7 @@ class SourceBook extends Model
         'notes',
     ];
 
+    //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {
         return [
@@ -35,16 +37,22 @@ class SourceBook extends Model
         ];
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //ogni manuale appartiene a un solo regolamento
     public function ruleset(): BelongsTo
     {
         return $this->belongsTo(Ruleset::class);
     }
 
+    //Relazione uno-a-molti (HasMany):
+    //un manuale può essere citato da molti riferimenti
     public function sourceReferences(): HasMany
     {
         return $this->hasMany(SourceReference::class);
     }
 
+    //Relazione uno-a-molti (HasMany):
+    //un manuale può avere molte relazioni editoriali in uscita
     public function outgoingSourceBookRelations(): HasMany
     {
         return $this->hasMany(
@@ -53,6 +61,8 @@ class SourceBook extends Model
         );
     }
 
+    //Relazione uno-a-molti (HasMany):
+    //un manuale può avere molte relazioni editoriali in entrata
     public function incomingSourceBookRelations(): HasMany
     {
         return $this->hasMany(

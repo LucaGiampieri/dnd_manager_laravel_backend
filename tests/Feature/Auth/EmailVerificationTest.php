@@ -5,34 +5,75 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 
-test('email can be verified', function () {
-    $user = User::factory()->unverified()->create();
+test('un indirizzo email può essere verificato', function () {
+    //Crea un utente il cui indirizzo email non è ancora verificato
+    $user = User::factory()
+        ->unverified()
+        ->create();
 
+    //Intercetta gli eventi Laravel senza eseguirne
+    //gli eventuali listener reali
     Event::fake();
 
+    //Genera un collegamento temporaneo firmato
+    //valido per sessanta minuti
     $verificationUrl = URL::temporarySignedRoute(
         'verification.verify',
         now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1($user->email)]
+        [
+            'id' => $user->id,
+            'hash' => sha1($user->email),
+        ]
     );
 
-    $response = $this->actingAs($user)->get($verificationUrl);
+    //Simula l’utente autenticato mentre apre
+    //il collegamento di verifica ricevuto
+    $response = $this
+        ->actingAs($user)
+        ->get($verificationUrl);
 
+    //Verifica che Laravel abbia emesso l’evento
+    //che segnala la conferma dell’indirizzo email
     Event::assertDispatched(Verified::class);
-    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(config('app.frontend_url').'/dashboard?verified=1');
+
+    //Ricarica l’utente dal database e verifica
+    //che l’indirizzo email risulti confermato
+    expect(
+        $user->fresh()->hasVerifiedEmail()
+    )->toBeTrue();
+
+    //Verifica il reindirizzamento al frontend
+    //con il parametro che segnala la verifica completata
+    $response->assertRedirect(
+        config('app.frontend_url') . '/dashboard?verified=1'
+    );
 });
 
-test('email is not verified with invalid hash', function () {
-    $user = User::factory()->unverified()->create();
+test('un indirizzo email non viene verificato con un hash errato', function () {
+    //Crea un utente con indirizzo email non verificato
+    $user = User::factory()
+        ->unverified()
+        ->create();
 
+    //Genera un collegamento firmato utilizzando
+    //un hash che non corrisponde all’email dell’utente
     $verificationUrl = URL::temporarySignedRoute(
         'verification.verify',
         now()->addMinutes(60),
-        ['id' => $user->id, 'hash' => sha1('wrong-email')]
+        [
+            'id' => $user->id,
+            'hash' => sha1('wrong-email'),
+        ]
     );
 
-    $this->actingAs($user)->get($verificationUrl);
+    //Simula il tentativo di verifica dell’utente autenticato
+    $this
+        ->actingAs($user)
+        ->get($verificationUrl);
 
-    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
+    //Ricarica l’utente e verifica che l’indirizzo
+    //sia rimasto non confermato
+    expect(
+        $user->fresh()->hasVerifiedEmail()
+    )->toBeFalse();
 });

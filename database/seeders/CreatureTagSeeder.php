@@ -7,9 +7,12 @@ use Illuminate\Database\Seeder;
 
 class CreatureTagSeeder extends Seeder
 {
+    //Inserisce i tag aggiuntivi utilizzati dalle creature
     public function run(): void
     {
+        //Definisce i tag generali, planari e relativi ai popoli
         $creatureTags = [
+            //Capacità o categorie speciali
             [
                 'key' => 'shapechanger',
                 'name' => 'Mutaforma',
@@ -28,6 +31,8 @@ class CreatureTagSeeder extends Seeder
                 'description' => 'Indica un blocco statistiche umanoide generico che può rappresentare un individuo appartenente a una qualsiasi razza compatibile.',
                 'sort_order' => 3,
             ],
+
+            //Categorie di immondi
             [
                 'key' => 'demon',
                 'name' => 'Demone',
@@ -46,6 +51,8 @@ class CreatureTagSeeder extends Seeder
                 'description' => 'Identifica un immondo mercenario dei Piani Inferiori, generalmente interessato al proprio vantaggio e disposto a servire chi lo ricompensa.',
                 'sort_order' => 6,
             ],
+
+            //Popoli e lignaggi delle creature
             [
                 'key' => 'aarakocra',
                 'name' => 'Aarakocra',
@@ -174,11 +181,15 @@ class CreatureTagSeeder extends Seeder
             ],
         ];
 
+        //Inserisce o aggiorna ogni tag
         foreach ($creatureTags as $creatureTag) {
             CreatureTag::updateOrCreate(
+                //Identifica il tag tramite la chiave stabile
                 [
                     'key' => $creatureTag['key'],
                 ],
+
+                //Inserisce o aggiorna tutti i dati
                 [
                     'name' => $creatureTag['name'],
                     'description' => $creatureTag['description'],

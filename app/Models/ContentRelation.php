@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ContentRelation extends Model
 {
+    //Campi che possono essere valorizzati tramite create o update
     protected $fillable = [
         'content_type',
         'content_id',
@@ -16,6 +17,7 @@ class ContentRelation extends Model
         'notes',
     ];
 
+    //Converte automaticamente gli identificativi in numeri interi
     protected function casts(): array
     {
         return [
@@ -24,11 +26,15 @@ class ContentRelation extends Model
         ];
     }
 
+    //Relazione polimorfica molti-a-uno (MorphTo):
+    //indica il contenuto da cui parte la relazione
     public function content(): MorphTo
     {
         return $this->morphTo();
     }
 
+    //Relazione polimorfica molti-a-uno (MorphTo):
+    //indica il contenuto verso cui punta la relazione
     public function relatedContent(): MorphTo
     {
         return $this->morphTo();

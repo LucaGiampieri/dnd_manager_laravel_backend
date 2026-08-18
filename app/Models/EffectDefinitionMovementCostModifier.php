@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EffectDefinitionMovementCostModifier extends Model
 {
+    //Aggiunge riferimenti ai manuali e relazioni con altri contenuti
     use HasSourceReferences;
 
+    //Campi che possono essere valorizzati tramite create o update
     protected $fillable = [
         'effect_definition_id',
         'key',
@@ -23,6 +25,7 @@ class EffectDefinitionMovementCostModifier extends Model
         'notes',
     ];
 
+    //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {
         return [
@@ -31,11 +34,15 @@ class EffectDefinitionMovementCostModifier extends Model
         ];
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //ogni modifica appartiene a una sola definizione di effetto
     public function effectDefinition(): BelongsTo
     {
         return $this->belongsTo(EffectDefinition::class);
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //una modifica può essere ignorata da un tipo di movimento specifico
     public function waivedByMovementType(): BelongsTo
     {
         return $this->belongsTo(

@@ -7,9 +7,12 @@ use Illuminate\Database\Seeder;
 
 class CurrencySeeder extends Seeder
 {
+    //Inserisce le cinque monete del regolamento
     public function run(): void
     {
+        //Definisce valore, peso e diffusione di ogni moneta
         $currencies = [
+            //Moneta di rame
             [
                 'name' => 'Rame',
                 'code' => 'mr',
@@ -19,6 +22,8 @@ class CurrencySeeder extends Seeder
                 'is_common' => true,
                 'description' => 'La moneta di rame è la denominazione di valore più basso ed è comune nelle piccole transazioni.',
             ],
+
+            //Moneta d'argento
             [
                 'name' => 'Argento',
                 'code' => 'ma',
@@ -28,6 +33,8 @@ class CurrencySeeder extends Seeder
                 'is_common' => true,
                 'description' => 'La moneta d’argento vale dieci monete di rame ed è molto diffusa nelle transazioni quotidiane.',
             ],
+
+            //Moneta di electrum
             [
                 'name' => 'Electrum',
                 'code' => 'me',
@@ -37,6 +44,8 @@ class CurrencySeeder extends Seeder
                 'is_common' => false,
                 'description' => 'La moneta di electrum vale cinque monete d’argento ed è meno comune delle principali denominazioni.',
             ],
+
+            //Moneta d'oro
             [
                 'name' => 'Oro',
                 'code' => 'mo',
@@ -46,6 +55,8 @@ class CurrencySeeder extends Seeder
                 'is_common' => true,
                 'description' => 'La moneta d’oro vale dieci monete d’argento ed è l’unità di riferimento più usata per indicare prezzi e ricchezza.',
             ],
+
+            //Moneta di platino
             [
                 'name' => 'Platino',
                 'code' => 'mp',
@@ -57,11 +68,15 @@ class CurrencySeeder extends Seeder
             ],
         ];
 
+        //Inserisce o aggiorna ogni valuta
         foreach ($currencies as $currency) {
             Currency::updateOrCreate(
+                //Identifica la valuta tramite il codice
                 [
                     'code' => $currency['code'],
                 ],
+
+                //Inserisce o aggiorna tutti i dati
                 [
                     'name' => $currency['name'],
                     'value_in_copper_pieces' =>

@@ -7,5 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subclass extends Model
 {
+    //Aggiunge riferimenti ai manuali e relazioni con altri contenuti
     use HasSourceReferences;
+
 }

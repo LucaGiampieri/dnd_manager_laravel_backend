@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ConditionLevel extends Model
 {
+    //Aggiunge riferimenti ai manuali e relazioni con altri contenuti
     use HasSourceReferences;
 
+    //Campi che possono essere valorizzati tramite create o update
     protected $fillable = [
         'condition_id',
         'level',
@@ -18,6 +20,7 @@ class ConditionLevel extends Model
         'is_terminal',
     ];
 
+    //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {
         return [
@@ -26,6 +29,8 @@ class ConditionLevel extends Model
         ];
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //ogni livello appartiene a una sola condizione progressiva
     public function condition(): BelongsTo
     {
         return $this->belongsTo(Condition::class);

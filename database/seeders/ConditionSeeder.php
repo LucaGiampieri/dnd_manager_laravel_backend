@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Condition;
 use App\Models\Ruleset;
 use Illuminate\Database\Seeder;
 
@@ -9,9 +10,13 @@ class ConditionSeeder extends Seeder
 {
     public function run(): void
     {
-        $ruleset = Ruleset::where('key', 'dnd5e_2014')
+        //Recupera il regolamento D&D 5e 2014
+        //al quale appartengono tutte le condizioni
+        $ruleset = Ruleset::query()
+            ->where('key', 'dnd5e_2014')
             ->firstOrFail();
 
+        //Definisce le quindici condizioni del regolamento
         $conditions = [
             [
                 'key' => 'blinded',
@@ -92,6 +97,7 @@ class ConditionSeeder extends Seeder
             ],
         ];
 
+        //Crea o aggiorna ogni condizione senza produrre duplicati
         foreach ($conditions as $condition) {
             $ruleset->conditions()->updateOrCreate(
                 [
@@ -100,55 +106,21 @@ class ConditionSeeder extends Seeder
                 [
                     'name' => $condition['name'],
                     'description' => $condition['description'],
-                    'is_level_based' => $condition['is_level_based'] ?? false,
-                    'maximum_level' => $condition['maximum_level'] ?? null,
+                    'is_level_based' =>
+                        $condition['is_level_based'] ?? false,
+                    'maximum_level' =>
+                        $condition['maximum_level'] ?? null,
                 ]
             );
         }
 
-        $exhaustion = $ruleset->conditions()
-    ->where('key', 'exhaustion')
-    ->firstOrFail();
-
-        $exhaustionLevels = [
-            [
-                'level' => 1,
-                'name' => 'Livello 1',
-                'description' => 'Svantaggio alle prove di caratteristica.',
-            ],
-            [
-                'level' => 2,
-                'name' => 'Livello 2',
-                'description' => 'Velocità dimezzata.',
-            ],
-            [
-                'level' => 3,
-                'name' => 'Livello 3',
-                'description' => 'Svantaggio ai tiri per colpire e ai tiri salvezza.',
-            ],
-            [
-                'level' => 4,
-                'name' => 'Livello 4',
-                'description' => 'Massimo dei punti ferita dimezzato.',
-            ],
-            [
-                'level' => 5,
-                'name' => 'Livello 5',
-                'description' => 'Velocità ridotta a zero.',
-            ],
-            [
-                'level' => 6,
-                'name' => 'Livello 6',
-                'description' => 'Morte.',
-                'is_terminal' => true,
-            ],
-        ];
-
-        /** @var \App\Models\Condition $exhaustion */
+        //Recupera lo Sfinimento appena creato
+        /** @var Condition $exhaustion */
         $exhaustion = $ruleset->conditions()
             ->where('key', 'exhaustion')
             ->firstOrFail();
 
+        //Definisce gli effetti cumulativi dei sei livelli di Sfinimento
         $exhaustionLevels = [
             [
                 'level' => 1,
@@ -183,6 +155,8 @@ class ConditionSeeder extends Seeder
             ],
         ];
 
+        //Relazione uno-a-molti (HasMany):
+        //una condizione di Sfinimento può possedere sei livelli
         foreach ($exhaustionLevels as $exhaustionLevel) {
             $exhaustion->levels()->updateOrCreate(
                 [
@@ -191,7 +165,8 @@ class ConditionSeeder extends Seeder
                 [
                     'name' => $exhaustionLevel['name'],
                     'description' => $exhaustionLevel['description'],
-                    'is_terminal' => $exhaustionLevel['is_terminal'] ?? false,
+                    'is_terminal' =>
+                        $exhaustionLevel['is_terminal'] ?? false,
                 ]
             );
         }
