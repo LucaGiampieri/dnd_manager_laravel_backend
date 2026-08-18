@@ -21,6 +21,8 @@ use App\Models\Skill;
 use App\Models\Spell;
 use App\Models\SpellSchool;
 use App\Models\Subclass;
+use App\Models\Alignment;
+use App\Models\CreatureStatBlock;
 
 it('i contenuti del regolamento possono avere riferimenti alle fonti', function () {
     $models = [
@@ -43,6 +45,8 @@ it('i contenuti del regolamento possono avere riferimenti alle fonti', function 
         Spell::class,
         SpellSchool::class,
         Subclass::class,
+        Alignment::class,
+        CreatureStatBlock::class,
     ];
 
     foreach ($models as $model) {

@@ -41,4 +41,11 @@ class Ruleset extends Model
             'source'
         );
     }
+
+    //Relazione uno-a-molti (HasMany):
+    //un regolamento può contenere molti allineamenti
+    public function alignments(): HasMany
+    {
+        return $this->hasMany(Alignment::class);
+    }
 }
