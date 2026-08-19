@@ -24,4 +24,13 @@ class Ability extends Model
     {
         return $this->hasMany(Skill::class);
     }
+
+    //Relazione uno-a-molti (HasMany):
+    //una caratteristica può essere utilizzata da molti stat block
+    public function creatureStatBlockAbilities(): HasMany
+    {
+        return $this->hasMany(
+            CreatureStatBlockAbility::class
+        );
+    }
 }

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,6 +21,9 @@ class DatabaseSeeder extends Seeder
 
             //Crea i nove allineamenti del regolamento
             AlignmentSeeder::class,
+
+            //Crea i gradi di sfida con bonus di competenza e PE
+            ChallengeRatingSeeder::class,
 
             //Crea caratteristiche e abilità
             AbilitySeeder::class,
@@ -49,17 +51,9 @@ class DatabaseSeeder extends Seeder
             ConditionSeeder::class,
         ]);
 
-        //Recupera l'utente di test oppure ne prepara uno nuovo
-        $user = User::firstOrNew([
-            'email' => 'test@example.com',
-        ]);
-
-        //Imposta i dati dell'utente di test
-        $user->name = 'Test User';
-        $user->email_verified_at = now();
-        $user->password = 'password';
-
-        //Inserisce o aggiorna l'utente nel database
-        $user->save();
+        //Inserisce i dati dimostrativi soltanto in ambiente locale
+        if (app()->environment('local')) {
+            $this->call(LocalDevelopmentSeeder::class);
+        }
     }
 }

@@ -22,6 +22,11 @@ class SourceReference extends Model
         'official_text',
     ];
 
+    //Campi esclusi automaticamente da array e risposte JSON
+    protected $hidden = [
+        'official_text',
+    ];
+
     //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {

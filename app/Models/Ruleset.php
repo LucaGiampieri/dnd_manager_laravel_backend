@@ -56,4 +56,11 @@ class Ruleset extends Model
     {
         return $this->hasMany(Alignment::class);
     }
+
+    //Relazione uno-a-molti (HasMany):
+    //un regolamento può definire molti gradi di sfida
+    public function challengeRatings(): HasMany
+    {
+        return $this->hasMany(ChallengeRating::class);
+    }
 }

@@ -2,6 +2,7 @@
 
 use App\Models\Ability;
 use App\Models\Alignment;
+use App\Models\ChallengeRating;
 use App\Models\Condition;
 use App\Models\ConditionLevel;
 use App\Models\Concerns\HasContentRelations;
@@ -31,6 +32,7 @@ it('i contenuti del regolamento possono avere riferimenti alle fonti', function 
     $models = [
         Ability::class,
         Alignment::class,
+        ChallengeRating::class,
         Condition::class,
         ConditionLevel::class,
         CreatureStatBlock::class,
