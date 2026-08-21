@@ -65,4 +65,18 @@ class Language extends Model
             'parent_language_id'
         );
     }
+
+    //Relazione uno-a-molti:
+    //una lingua può essere assegnata a più razze
+    public function raceAssignments(): HasMany
+    {
+        return $this->hasMany(RaceLanguage::class);
+    }
+
+    //Relazione uno-a-molti:
+    //una lingua può essere assegnata a più sottorazze
+    public function subraceAssignments(): HasMany
+    {
+        return $this->hasMany(SubraceLanguage::class);
+    }
 }

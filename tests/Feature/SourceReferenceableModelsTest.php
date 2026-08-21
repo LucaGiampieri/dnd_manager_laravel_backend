@@ -25,6 +25,16 @@ use App\Models\Spell;
 use App\Models\SpellSchool;
 use App\Models\Subclass;
 use App\Models\CharacterClass;
+use App\Models\Race;
+use App\Models\Subrace;
+use App\Models\RacePhysicalTrait;
+use App\Models\SubracePhysicalTrait;
+use App\Models\OptionalRule;
+use App\Models\Feature;
+use App\Models\ArmorProficiency;
+use App\Models\ToolProficiency;
+use App\Models\WeaponProficiency;
+use App\Models\WeaponProperty;
 
 //Verifica che tutti i contenuti ufficiali usino i trait condivisi
 it('i contenuti del regolamento possono avere riferimenti alle fonti', function () {
@@ -53,6 +63,16 @@ it('i contenuti del regolamento possono avere riferimenti alle fonti', function 
         SpellSchool::class,
         CharacterClass::class,
         Subclass::class,
+        Race::class,
+        Subrace::class,
+        RacePhysicalTrait::class,
+        SubracePhysicalTrait::class,
+        OptionalRule::class,
+        Feature::class,
+        ArmorProficiency::class,
+        ToolProficiency::class,
+        WeaponProficiency::class,
+        WeaponProperty::class,
     ];
 
     //Controlla separatamente ogni modello ufficiale

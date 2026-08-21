@@ -27,7 +27,7 @@ class Ruleset extends Model
     }
 
     //Relazione uno-a-molti (HasMany):
-    //un regolamento può contenere molti manuali
+    //un regolamento può comprendere molti manuali
     public function sourceBooks(): HasMany
     {
         return $this->hasMany(SourceBook::class);
@@ -40,7 +40,7 @@ class Ruleset extends Model
         return $this->hasMany(Condition::class);
     }
 
-    //Relazione polimorfica uno-a-molti (MorphMany):
+    //Relazione uno-a-molti polimorfica (MorphMany):
     //un regolamento può essere la fonte di molte definizioni di effetto
     public function effectDefinitions(): MorphMany
     {
@@ -61,6 +61,31 @@ class Ruleset extends Model
     //un regolamento può definire molti gradi di sfida
     public function challengeRatings(): HasMany
     {
-        return $this->hasMany(ChallengeRating::class);
+        return $this->hasMany(ChallengeRating::class)
+            ->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un regolamento può comprendere molte razze e stirpi
+    public function races(): HasMany
+    {
+        return $this->hasMany(Race::class)
+            ->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un regolamento può definire molte regole opzionali
+    public function optionalRules(): HasMany
+    {
+        return $this->hasMany(OptionalRule::class)
+            ->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti:
+    //un regolamento può definire molte capacità
+    public function features(): HasMany
+    {
+        return $this->hasMany(Feature::class)
+            ->orderBy('name');
     }
 }

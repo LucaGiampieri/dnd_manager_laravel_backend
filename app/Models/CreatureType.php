@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CreatureType extends Model
 {
@@ -19,11 +20,19 @@ class CreatureType extends Model
         'sort_order',
     ];
 
-    //Converte automaticamente l'ordine in un numero intero
+    //Converte automaticamente i valori nei tipi PHP corretti
     protected function casts(): array
     {
         return [
             'sort_order' => 'integer',
         ];
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un tipo di creatura può essere utilizzato da molte razze
+    public function races(): HasMany
+    {
+        return $this->hasMany(Race::class)
+            ->orderBy('sort_order');
     }
 }

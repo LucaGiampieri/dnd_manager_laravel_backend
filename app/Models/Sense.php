@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sense extends Model
 {
@@ -24,5 +25,19 @@ class Sense extends Model
         return [
             'sort_order' => 'integer',
         ];
+    }
+
+    //Relazione uno-a-molti:
+    //un senso può essere assegnato a molte razze
+    public function raceAssignments(): HasMany
+    {
+        return $this->hasMany(RaceSense::class);
+    }
+
+    //Relazione uno-a-molti:
+    //un senso può essere assegnato a molte sottorazze
+    public function subraceAssignments(): HasMany
+    {
+        return $this->hasMany(SubraceSense::class);
     }
 }

@@ -6,48 +6,25 @@ use Database\Seeders\LanguageScriptSeeder;
 use Database\Seeders\LanguageSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-//Ricrea il database di test prima di ogni test
-//per garantire che alfabeti e lingue partano da uno stato pulito
+//Ricrea il database prima di ogni test
 uses(RefreshDatabase::class);
 
-it('crea alfabeti lingue e dialetti senza duplicati', function () {
-    //Esegue una prima volta i seeder degli alfabeti e delle lingue
+//Verifica il catalogo completo delle lingue
+it('crea alfabeti e tutte le lingue senza duplicati', function () {
+    //Esegue due volte i seeder per verificarne l'idempotenza
     $this->seed(LanguageScriptSeeder::class);
     $this->seed(LanguageSeeder::class);
 
-    //Ripete entrambi i seeder per verificare
-    //che non vengano creati record duplicati
     $this->seed(LanguageScriptSeeder::class);
     $this->seed(LanguageSeeder::class);
 
-    //Verifica che siano stati creati esattamente sei alfabeti
-    expect(LanguageScript::query()->count())->toBe(6);
+    //Recupera le lingue nel loro ordine ufficiale
+    $languages = Language::query()
+        ->orderBy('sort_order')
+        ->get();
 
-    //Verifica i nomi degli alfabeti e il loro ordine
-    expect(
-        LanguageScript::query()
-            ->orderBy('sort_order')
-            ->pluck('name')
-            ->all()
-    )->toBe([
-        'Alfabeto Comune',
-        'Alfabeto Nanico',
-        'Alfabeto Elfico',
-        'Alfabeto Infernale',
-        'Alfabeto Celestiale',
-        'Alfabeto Draconico',
-    ]);
-
-    //Verifica che siano state create esattamente ventidue lingue
-    expect(Language::query()->count())->toBe(22);
-
-    //Verifica le chiavi di tutte le lingue e il loro ordine
-    expect(
-        Language::query()
-            ->orderBy('sort_order')
-            ->pluck('key')
-            ->all()
-    )->toBe([
+    //Definisce tutte le chiavi attese
+    $expectedKeys = [
         'common',
         'dwarvish',
         'elvish',
@@ -70,76 +47,117 @@ it('crea alfabeti lingue e dialetti senza duplicati', function () {
         'aquan',
         'ignan',
         'terran',
-    ]);
+        'aarakocra',
+        'blink_dog',
+        'bullywug',
+        'deep_crow',
+        'giant_eagle',
+        'giant_elk',
+        'giant_owl',
+        'gith',
+        'gnoll',
+        'grell',
+        'grung',
+        'hook_horror',
+        'ice_toad',
+        'ixitxachitl',
+        'kruthik',
+        'leonin',
+        'loxodon',
+        'minotaur',
+        'modron',
+        'otyugh',
+        'quori',
+        'sahuagin',
+        'slaad',
+        'sphinx',
+        'thri_kreen',
+        'tlincalli',
+        'troglodyte',
+        'umber_hulk',
+        'vegepygmy',
+        'vedalken',
+        'winter_wolf',
+        'worg',
+        'yikaria',
+        'yeti',
+    ];
 
-    //Verifica che siano presenti otto lingue standard
+    //Verifica alfabeti, quantità, chiavi e ordinamento
+    expect(LanguageScript::query()->count())->toBe(6)
+        ->and(
+            LanguageScript::query()
+                ->orderBy('sort_order')
+                ->pluck('name')
+                ->all()
+        )->toBe([
+            'Alfabeto Comune',
+            'Alfabeto Nanico',
+            'Alfabeto Elfico',
+            'Alfabeto Infernale',
+            'Alfabeto Celestiale',
+            'Alfabeto Draconico',
+        ])
+        ->and($languages)->toHaveCount(56)
+        ->and($languages->pluck('key')->all())
+        ->toBe($expectedKeys)
+        ->and($languages->pluck('sort_order')->all())
+        ->toBe(range(1, 56));
+
+    //Verifica la suddivisione per categoria
     expect(
         Language::query()
             ->where('category', 'standard')
             ->count()
-    )->toBe(8);
+    )->toBe(8)
+        ->and(
+            Language::query()
+                ->where('category', 'exotic')
+                ->count()
+        )->toBe(42)
+        ->and(
+            Language::query()
+                ->where('category', 'secret')
+                ->count()
+        )->toBe(2)
+        ->and(
+            Language::query()
+                ->where('category', 'dialect')
+                ->count()
+        )->toBe(4);
 
-    //Verifica che siano presenti otto lingue esotiche
+    //Solo le lingue generali possono essere scelte liberamente
     expect(
         Language::query()
-            ->where('category', 'exotic')
+            ->where('selectable', true)
             ->count()
-    )->toBe(8);
+    )->toBe(16)
+        ->and(
+            Language::query()
+                ->where('requires_dm_permission', false)
+                ->count()
+        )->toBe(8);
 
-    //Verifica che siano presenti due lingue segrete
+    //Le lingue speciali non compaiono nelle scelte generiche
     expect(
         Language::query()
-            ->where('category', 'secret')
+            ->where('sort_order', '>=', 23)
+            ->where('selectable', false)
             ->count()
-    )->toBe(2);
+    )->toBe(34);
 
-    //Verifica che siano presenti quattro dialetti
-    expect(
-        Language::query()
-            ->where('category', 'dialect')
-            ->count()
-    )->toBe(4);
-
-    //Verifica che ogni lingua possieda una descrizione
+    //Tutte le lingue devono possedere una descrizione
     expect(
         Language::query()
             ->whereNull('description')
             ->count()
     )->toBe(0);
 
-    //Recupera le due lingue segrete concesse dalle capacità di classe
-    $secretLanguages = Language::query()
-        ->whereIn('key', [
-            'druidic',
-            'thieves_cant',
-        ])
-        ->get();
-
-    //Verifica che le lingue segrete non siano
-    //selezionabili come normali opzioni linguistiche
-    expect(
-        $secretLanguages->every(
-            fn (Language $language): bool =>
-                $language->selectable === false
-        )
-    )->toBeTrue();
-
-    //Verifica che un’assegnazione speciale
-    //delle lingue segrete richieda il permesso del DM
-    expect(
-        $secretLanguages->every(
-            fn (Language $language): bool =>
-                $language->requires_dm_permission === true
-        )
-    )->toBeTrue();
-
-    //Recupera la lingua principale Primordiale
+    //Verifica i quattro dialetti del Primordiale
     $primordial = Language::query()
         ->where('key', 'primordial')
         ->firstOrFail();
 
-    //Relazione uno-a-molti autoriferita (HasMany):
-    //verifica che Primordiale possieda i suoi quattro dialetti
     expect(
         $primordial->dialects
             ->pluck('key')
@@ -153,12 +171,22 @@ it('crea alfabeti lingue e dialetti senza duplicati', function () {
         'terran',
     ]);
 
-    //Recupera la lingua Gigante
+    //Verifica un alfabeto condiviso
     $giant = Language::query()
         ->where('key', 'giant')
         ->firstOrFail();
 
-    //Relazione molti-a-uno (BelongsTo):
-    //verifica che Gigante utilizzi l’Alfabeto Nanico
-    expect($giant->languageScript->key)->toBe('dwarvish');
+    expect($giant->languageScript->key)
+        ->toBe('dwarvish');
+
+    //Verifica la lingua speciale necessaria agli aarakocra
+    $aarakocra = Language::query()
+        ->where('key', 'aarakocra')
+        ->firstOrFail();
+
+    expect($aarakocra->name)->toBe('Aarakocra')
+        ->and($aarakocra->category)->toBe('exotic')
+        ->and($aarakocra->selectable)->toBeFalse()
+        ->and($aarakocra->requires_dm_permission)->toBeTrue()
+        ->and($aarakocra->languageScript)->toBeNull();
 });

@@ -33,4 +33,40 @@ class Ability extends Model
             CreatureStatBlockAbility::class
         );
     }
+
+    //Relazione uno-a-molti (HasMany):
+    //una caratteristica può ricevere bonus da molte razze
+    public function raceAbilityBonuses(): HasMany
+    {
+        return $this->hasMany(RaceAbilityBonus::class);
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //una caratteristica può ricevere bonus da molte sottorazze
+    public function subraceAbilityBonuses(): HasMany
+    {
+        return $this->hasMany(SubraceAbilityBonus::class);
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //una caratteristica può essere proposta da molte scelte razziali
+    public function raceChoiceOptions(): HasMany
+    {
+        return $this->hasMany(
+            RaceChoiceOption::class,
+            'option_id'
+        )
+            ->where('option_type', 'ability');
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //una caratteristica può essere proposta da molte scelte di sottorazza
+    public function subraceChoiceOptions(): HasMany
+    {
+        return $this->hasMany(
+            SubraceChoiceOption::class,
+            'option_id'
+        )
+            ->where('option_type', 'ability');
+    }
 }

@@ -17,6 +17,7 @@ class EffectDefinition extends Model
         'key',
         'name',
         'application_type',
+        'target_scope',
         'ends_with_source',
         'condition',
         'description',

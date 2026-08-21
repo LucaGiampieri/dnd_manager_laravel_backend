@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SourceBook extends Model
 {
@@ -49,6 +50,23 @@ class SourceBook extends Model
     public function sourceReferences(): HasMany
     {
         return $this->hasMany(SourceReference::class);
+    }
+
+    //Relazione molti-a-molti (BelongsToMany):
+    //un manuale può essere reso disponibile in molte campagne
+    public function campaigns(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Campaign::class,
+            'campaign_source_books'
+        )
+            //Utilizza un modello pivot con conversioni dedicate
+            ->using(CampaignSourceBook::class)
+            ->withPivot([
+                'enabled',
+                'notes',
+            ])
+            ->withTimestamps();
     }
 
     //Relazione uno-a-molti (HasMany):
