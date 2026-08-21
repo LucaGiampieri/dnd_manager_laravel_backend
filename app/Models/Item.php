@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Item extends Model
 {
@@ -18,6 +19,9 @@ class Item extends Model
     protected $fillable = [
         'ruleset_id',
         'key',
+        'canonical_key',
+        'version_key',
+        'is_legacy',
         'name',
         'item_type_id',
         'description',
@@ -38,11 +42,54 @@ class Item extends Model
             'ruleset_id' => 'integer',
             'item_type_id' => 'integer',
             'weight_kg' => 'decimal:3',
+            'is_legacy' => 'boolean',
             'is_stackable' => 'boolean',
             'is_magical' => 'boolean',
             'requires_attunement' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    //Registra i valori automatici assegnati ai nuovi oggetti
+    protected static function booted(): void
+    {
+        static::creating(function (Item $item): void {
+            //Utilizza la chiave principale come chiave canonica
+            //quando non viene fornita esplicitamente
+            if (blank($item->canonical_key)) {
+                $item->canonical_key = $item->key;
+            }
+
+            //Gli oggetti creati dagli utenti appartengono
+            //automaticamente alla versione personalizzata
+            if (blank($item->version_key)) {
+                $item->version_key = 'custom';
+            }
+
+            //Le nuove versioni sono attive per impostazione predefinita
+            if ($item->is_legacy === null) {
+                $item->is_legacy = false;
+            }
+        });
+
+        //Elimina gli effetti polimorfici quando viene eliminato l'oggetto
+        static::deleting(function (Item $item): void {
+            //Conserva gli effetti durante una eventuale eliminazione logica
+            if (
+                method_exists($item, 'isForceDeleting')
+                && ! $item->isForceDeleting()
+            ) {
+                return;
+            }
+
+            //Elimina ogni effetto tramite il modello per eseguire
+            //anche la pulizia dei suoi riferimenti e delle sue relazioni
+            $item->effectDefinitions()
+                ->get()
+                ->each(function (EffectDefinition $effect): void {
+                    $effect->delete();
+                });
+        });
     }
 
     //Relazione molti-a-uno (BelongsTo):
@@ -82,7 +129,7 @@ class Item extends Model
     }
 
     //Relazione uno-a-molti (HasMany):
-    //un'arma può essere indicata direttamente da competenze specifiche
+    //un'arma può essere indicata da competenze specifiche
     public function directWeaponProficiencies(): HasMany
     {
         return $this->hasMany(
@@ -119,7 +166,6 @@ class Item extends Model
             WeaponProficiency::class,
             'weapon_proficiency_items'
         )
-            //Utilizza il modello pivot con conversioni dedicate
             ->using(WeaponProficiencyItem::class)
             ->withPivot([
                 'id',
@@ -137,7 +183,6 @@ class Item extends Model
             ArmorProficiency::class,
             'armor_proficiency_items'
         )
-            //Utilizza il modello pivot con conversioni dedicate
             ->using(ArmorProficiencyItem::class)
             ->withPivot([
                 'id',
@@ -155,7 +200,6 @@ class Item extends Model
             ToolProficiency::class,
             'tool_proficiency_items'
         )
-            //Utilizza il modello pivot con conversioni dedicate
             ->using(ToolProficiencyItem::class)
             ->withPivot([
                 'id',
@@ -163,5 +207,30 @@ class Item extends Model
             ])
             ->withTimestamps()
             ->orderBy('tool_proficiencies.sort_order');
+    }
+
+    //Relazione uno-a-uno (HasOne):
+    //un oggetto magico può possedere un profilo dedicato
+    public function magicProfile(): HasOne
+    {
+        return $this->hasOne(ItemMagicProfile::class);
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un oggetto può possedere cariche, utilizzi o dosi
+    public function resources(): HasMany
+    {
+        return $this->hasMany(ItemResource::class)
+            ->orderBy('sort_order');
+    }
+
+    //Relazione polimorfica uno-a-molti (MorphMany):
+    //un oggetto può generare molti effetti meccanici
+    public function effectDefinitions(): MorphMany
+    {
+        return $this->morphMany(
+            EffectDefinition::class,
+            'source'
+        )->orderBy('sort_order');
     }
 }

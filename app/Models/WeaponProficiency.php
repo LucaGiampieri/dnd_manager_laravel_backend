@@ -93,6 +93,13 @@ class WeaponProficiency extends Model
         );
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //una competenza specifica può riferirsi a una singola arma
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(Item::class);
+    }
+
     //Relazione molti-a-molti (BelongsToMany):
     //una categoria di competenza può comprendere molte armi
     public function items(): BelongsToMany

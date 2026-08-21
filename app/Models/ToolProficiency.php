@@ -85,6 +85,13 @@ class ToolProficiency extends Model
         );
     }
 
+    //Relazione molti-a-uno (BelongsTo):
+    //una competenza specifica può riferirsi a un singolo strumento
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(Item::class);
+    }
+
     //Relazione uno-a-molti (HasMany):
     //una categoria possiede molte assegnazioni di strumenti
     public function itemAssignments(): HasMany

@@ -40,8 +40,30 @@ class DatabaseSeeder extends Seeder
             //Crea i cataloghi collegati alla magia
             SpellSchoolSeeder::class,
 
-            //Crea valute, sensi e linguaggi
+            //Crea valute e cataloghi dell'equipaggiamento
             CurrencySeeder::class,
+            ItemTypeSeeder::class,
+            WeaponPropertySeeder::class,
+
+            //Crea tutte le armi comuni del PHB 2014
+            WeaponSeeder::class,
+
+            //Crea le categorie e le competenze nelle singole armi
+            WeaponProficiencySeeder::class,
+
+            //Crea armature e scudo del Manuale del Giocatore 2014
+            ArmorSeeder::class,
+
+            //Crea le competenze nelle categorie di armature e scudi
+            ArmorProficiencySeeder::class,
+
+            //Crea gli strumenti acquistabili del Manuale del Giocatore
+            ToolItemSeeder::class,
+
+            //Crea competenze negli strumenti e nei veicoli
+            ToolProficiencySeeder::class,
+
+            //Crea sensi e linguaggi
             SenseSeeder::class,
             LanguageSeeder::class,
 
