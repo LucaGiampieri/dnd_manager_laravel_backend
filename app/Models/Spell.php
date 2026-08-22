@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Spell extends Model
 {
@@ -18,6 +19,9 @@ class Spell extends Model
     protected $fillable = [
         'ruleset_id',
         'key',
+        'canonical_key',
+        'version_key',
+        'is_legacy',
         'name',
         'level',
         'spell_school_id',
@@ -62,12 +66,27 @@ class Spell extends Model
             'concentration' => 'boolean',
             'ritual' => 'boolean',
             'saving_throw_ability_id' => 'integer',
+            'is_legacy' => 'boolean',
         ];
     }
 
-    //Elimina gli effetti polimorfici quando viene eliminato l'incantesimo
+    //Genera il versionamento e pulisce gli effetti polimorfici
     protected static function booted(): void
     {
+        //Assegna valori sicuri agli incantesimi personalizzati
+        static::creating(function (Spell $spell): void {
+            //Utilizza la chiave tecnica anche come identità canonica
+            $spell->canonical_key ??= $spell->key;
+
+            //Gli incantesimi creati dagli utenti appartengono
+            //alla versione personalizzata
+            $spell->version_key ??= 'custom';
+
+            //Un nuovo incantesimo non è obsoleto
+            $spell->is_legacy ??= false;
+        });
+
+        //Elimina gli effetti quando viene eliminato l'incantesimo
         static::deleting(function (Spell $spell): void {
             //Conserva gli effetti durante una eliminazione logica
             if (
@@ -153,5 +172,12 @@ class Spell extends Model
             EffectDefinition::class,
             'source'
         );
+    }
+
+    //Relazione uno-a-uno (HasOne):
+    //ogni incantesimo può possedere un profilo di bersaglio o area
+    public function targetProfile(): HasOne
+    {
+        return $this->hasOne(SpellTargetProfile::class);
     }
 }

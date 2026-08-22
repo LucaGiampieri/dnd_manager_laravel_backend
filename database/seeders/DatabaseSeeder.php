@@ -40,6 +40,9 @@ class DatabaseSeeder extends Seeder
             //Crea i cataloghi collegati alla magia
             SpellSchoolSeeder::class,
 
+            //Crea gli incantesimi del Manuale del Giocatore 2014
+            PlayerHandbookSpellSeeder::class,
+
             //Crea valute e cataloghi dell'equipaggiamento
             CurrencySeeder::class,
             ItemTypeSeeder::class,

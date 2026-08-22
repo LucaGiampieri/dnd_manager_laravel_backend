@@ -7,70 +7,61 @@ use Illuminate\Database\Seeder;
 
 class SpellSchoolSeeder extends Seeder
 {
-    //Inserisce le otto scuole di magia
+    //Crea tutte le scuole di magia del regolamento
     public function run(): void
     {
-        //Definisce il nome e il significato generale di ogni scuola
+        //Definisce le otto scuole di magia
         $schools = [
-            //Abiurazione
             [
+                'key' => 'abjuration',
                 'name' => 'Abiurazione',
-                'description' => 'Comprende magie protettive che contrastano, annullano o allontanano effetti e creature.',
+                'description' => 'Magie protettive che respingono, annullano o ostacolano effetti e creature.',
             ],
-
-            //Ammaliamento
             [
-                'name' => 'Ammaliamento',
-                'description' => 'Influenza la mente, le emozioni e il comportamento delle creature.',
-            ],
-
-            //Divinazione
-            [
-                'name' => 'Divinazione',
-                'description' => 'Permette di ottenere informazioni, percepire ciò che è nascosto o conoscere possibili eventi.',
-            ],
-
-            //Evocazione
-            [
+                'key' => 'conjuration',
                 'name' => 'Evocazione',
-                'description' => 'Trasporta o richiama creature, oggetti e sostanze, anche attraverso grandi distanze o piani differenti.',
+                'description' => 'Magie che trasportano o richiamano creature, oggetti ed energia.',
             ],
-
-            //Illusione
             [
-                'name' => 'Illusione',
-                'description' => 'Inganna i sensi o la mente creando percezioni false o nascondendo la realtà.',
+                'key' => 'divination',
+                'name' => 'Divinazione',
+                'description' => 'Magie che rivelano informazioni, presagi e conoscenze nascoste.',
             ],
-
-            //Invocazione
             [
+                'key' => 'enchantment',
+                'name' => 'Ammaliamento',
+                'description' => 'Magie che influenzano la mente, le emozioni e il comportamento.',
+            ],
+            [
+                'key' => 'evocation',
                 'name' => 'Invocazione',
-                'description' => 'Manipola l’energia magica per generare effetti, spesso elementali, distruttivi o curativi.',
+                'description' => 'Magie che manipolano direttamente l’energia magica.',
             ],
-
-            //Necromanzia
             [
+                'key' => 'illusion',
+                'name' => 'Illusione',
+                'description' => 'Magie che ingannano i sensi e alterano la percezione.',
+            ],
+            [
+                'key' => 'necromancy',
                 'name' => 'Necromanzia',
-                'description' => 'Interagisce con l’energia vitale, la morte e le forze che animano i non morti.',
+                'description' => 'Magie che manipolano la vita, la morte e l’energia necrotica.',
             ],
-
-            //Trasmutazione
             [
+                'key' => 'transmutation',
                 'name' => 'Trasmutazione',
-                'description' => 'Modifica le proprietà, la forma o la natura di creature, oggetti e materiali.',
+                'description' => 'Magie che modificano le proprietà di creature, oggetti e materia.',
             ],
         ];
 
-        //Inserisce o aggiorna ogni scuola di magia
+        //Crea o aggiorna ogni scuola tramite la chiave stabile
         foreach ($schools as $school) {
-            SpellSchool::updateOrCreate(
-                //Identifica la scuola tramite il nome
+            SpellSchool::query()->updateOrCreate(
+                [
+                    'key' => $school['key'],
+                ],
                 [
                     'name' => $school['name'],
-                ],
-
-                //Inserisce o aggiorna la descrizione
-                [
                     'description' => $school['description'],
                 ]
             );
