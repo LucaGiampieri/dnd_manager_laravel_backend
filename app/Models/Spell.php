@@ -180,4 +180,13 @@ class Spell extends Model
     {
         return $this->hasOne(SpellTargetProfile::class);
     }
+
+    //Relazione uno-a-molti:
+    //un incantesimo può richiedere diversi componenti materiali
+    public function materialComponents(): HasMany
+    {
+        return $this->hasMany(
+            SpellMaterialComponent::class
+        )->orderBy('sort_order');
+    }
 }

@@ -7,7 +7,9 @@ use App\Models\Ruleset;
 use App\Models\SourceBook;
 use App\Models\Spell;
 use App\Models\SpellSchool;
+use App\Models\Currency;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use RuntimeException;
 
 class PlayerHandbookSpellSeeder extends Seeder
@@ -20,8 +22,9 @@ class PlayerHandbookSpellSeeder extends Seeder
             RulesetSeeder::class,
             SourceBookSeeder::class,
             AbilitySeeder::class,
+            CurrencySeeder::class,
             SpellSchoolSeeder::class,
-        ]);
+            ]);
 
         //Recupera il regolamento D&D 5e del 2014
         $ruleset = Ruleset::query()
@@ -40,6 +43,10 @@ class PlayerHandbookSpellSeeder extends Seeder
         //Indicizza le caratteristiche tramite l'abbreviazione italiana
         $abilities = Ability::query()
             ->pluck('id', 'short_name');
+
+        //Indicizza le valute tramite il loro codice italiano
+        $currencies = Currency::query()
+            ->pluck('id', 'code');
 
         //Raggruppa tutti i cataloghi del PHB 2014
         $spellGroups = [
@@ -61,6 +68,16 @@ class PlayerHandbookSpellSeeder extends Seeder
             //Carica gli incantesimi di 3° livello
             require database_path(
                 'data/phb_2014_level_3_spells.php'
+            ),
+
+            //Carica tutti gli incantesimi di 4° livello del PHB 2014
+            require database_path(
+                'data/phb_2014_level_4_spells.php'
+            ),
+
+            //Carica tutti gli incantesimi di 5° livello del PHB 2014
+            require database_path(
+                'data/phb_2014_level_5_spells.php'
             ),
         ];
 
@@ -152,6 +169,13 @@ class PlayerHandbookSpellSeeder extends Seeder
                     $data['target']
                 );
 
+                //Crea o aggiorna i componenti materiali dettagliati
+                $this->syncMaterialComponents(
+                    $spell,
+                    $data,
+                    $currencies
+                );
+
                 //Collega l'incantesimo alla sua pagina del PHB
                 $spell->sourceReferences()->updateOrCreate(
                     [
@@ -173,5 +197,125 @@ class PlayerHandbookSpellSeeder extends Seeder
                 );
             }
         }
+    }
+
+    //Sincronizza tutti i componenti materiali di un incantesimo
+    private function syncMaterialComponents(
+        Spell $spell,
+        array $data,
+        Collection $currencies
+    ): void {
+        $materials = $data['materials']
+            ?? $this->buildSummaryMaterial($data);
+
+        //Una formula senza componente materiale non può avere dettagli
+        if (! $data['material_component'] && $materials !== []) {
+            throw new RuntimeException(
+                "L'incantesimo {$data['key']} possiede dettagli materiali "
+                . 'ma non usa la componente M.'
+            );
+        }
+
+        $materialKeys = collect($materials)
+            ->pluck('key')
+            ->all();
+
+        //Rifiuta chiavi duplicate prima di raggiungere il database
+        if (count($materialKeys) !== count(array_unique($materialKeys))) {
+            throw new RuntimeException(
+                "L'incantesimo {$data['key']} contiene componenti "
+                . 'materiali duplicati.'
+            );
+        }
+
+        //Elimina dettagli rimossi mantenendo l'idempotenza
+        if ($materialKeys === []) {
+            $spell->materialComponents()->delete();
+        } else {
+            $spell->materialComponents()
+                ->whereNotIn('key', $materialKeys)
+                ->delete();
+        }
+
+        //Crea o aggiorna ogni requisito materiale
+        foreach ($materials as $material) {
+            $currencyCode = $material['currency_code'] ?? null;
+            $currencyId = null;
+
+            //Recupera la valuta del componente costoso
+            if ($currencyCode !== null) {
+                $currencyId = $currencies->get($currencyCode);
+
+                if ($currencyId === null) {
+                    throw new RuntimeException(
+                        "Valuta {$currencyCode} non trovata per "
+                        . "l'incantesimo {$data['key']}."
+                    );
+                }
+            }
+
+            //Crea o aggiorna il componente tramite la chiave stabile
+            $spell->materialComponents()->updateOrCreate(
+                [
+                    'key' => $material['key'],
+                ],
+                [
+                    'name' => $material['name'],
+                    'description' =>
+                        $material['description'] ?? null,
+                    'quantity' =>
+                        $material['quantity'] ?? null,
+                    'unit' =>
+                        $material['unit'] ?? null,
+                    'cost_amount' =>
+                        $material['cost_amount'] ?? null,
+                    'currency_id' => $currencyId,
+                    'cost_is_minimum' =>
+                        $material['cost_is_minimum'] ?? false,
+                    'consumed' =>
+                        $material['consumed'] ?? false,
+                    'focus_replaceable' =>
+                        $material['focus_replaceable'] ?? true,
+                    'sort_order' =>
+                        $material['sort_order'] ?? 0,
+                    'notes' =>
+                        $material['notes'] ?? null,
+                ]
+            );
+        }
+    }
+
+    //Converte i vecchi campi riassuntivi in un requisito dettagliato
+    private function buildSummaryMaterial(array $data): array
+    {
+        if (! $data['material_component']) {
+            return [];
+        }
+
+        $hasCost = $data['material_cost'] !== null;
+        $isConsumed = $data['material_consumed'];
+        $description = $data['material_description'];
+
+        //Ogni descrizione diventa un requisito materiale ordinato
+        return [[
+            'key' => 'material_requirement',
+            'name' => 'Requisito materiale',
+            'description' => $description,
+            'quantity' => null,
+            'unit' => null,
+            'cost_amount' => $data['material_cost'],
+            'currency_code' => $hasCost ? 'mo' : null,
+            'cost_is_minimum' => $hasCost
+                && $description !== null
+                && str_contains(
+                    mb_strtolower($description),
+                    'almeno'
+                ),
+            'consumed' => $isConsumed,
+            'focus_replaceable' => ! $hasCost && ! $isConsumed,
+            'sort_order' => 1,
+            'notes' => 'Requisito completo ricavato dal catalogo '
+                . 'dell’incantesimo.',
+        ]];
     }
 }
