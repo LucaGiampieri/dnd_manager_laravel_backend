@@ -71,7 +71,7 @@ it('gestisce tipologie prezzi e relazioni degli oggetti', function () {
         ->and($item->costs)->toHaveCount(1)
         ->and($item->costs->first()->is($cost))->toBeTrue()
         ->and($cost->currency->is($this->currency))->toBeTrue()
-        ->and($item->weight_kg)->toBe('1.500')
+        ->and($item->weight_kg)->toBe(1.5)
         ->and($item->is_stackable)->toBeFalse()
         ->and($item->is_magical)->toBeFalse()
         ->and($cost->amount)->toBe(15);

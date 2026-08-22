@@ -49,4 +49,22 @@ class EffectDefinition extends Model
             EffectDefinitionMovementCostModifier::class
         );
     }
+
+    //Relazione uno-a-molti (HasMany):
+    //un effetto può applicare diverse formule di guarigione
+    public function healings(): HasMany
+    {
+        return $this->hasMany(
+            EffectDefinitionHealing::class
+        )->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un effetto può modificare diversi tipi di tiro
+    public function rollModifiers(): HasMany
+    {
+        return $this->hasMany(
+            EffectDefinitionRollModifier::class
+        )->orderBy('sort_order');
+    }
 }

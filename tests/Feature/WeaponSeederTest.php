@@ -161,7 +161,7 @@ it('salva i valori meccanici delle armi', function () {
                 ->value_in_copper_pieces
         )
         ->toBe(100)
-        ->and($longsword->weight_kg)->toBe('1.361');
+        ->and($longsword->weight_kg)->toBe(1.361);
 
     //Verifica le formule di danno normali e fisse
     expect(

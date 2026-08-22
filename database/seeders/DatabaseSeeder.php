@@ -63,6 +63,9 @@ class DatabaseSeeder extends Seeder
             //Crea competenze negli strumenti e nei veicoli
             ToolProficiencySeeder::class,
 
+            //Crea il primo catalogo di oggetti magici del DMG 2014
+            DungeonMasterGuideMagicItemSeeder::class,
+
             //Crea sensi e linguaggi
             SenseSeeder::class,
             LanguageSeeder::class,

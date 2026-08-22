@@ -41,7 +41,7 @@ class Item extends Model
         return [
             'ruleset_id' => 'integer',
             'item_type_id' => 'integer',
-            'weight_kg' => 'decimal:3',
+            'weight_kg' => 'float',
             'is_legacy' => 'boolean',
             'is_stackable' => 'boolean',
             'is_magical' => 'boolean',
@@ -232,5 +232,63 @@ class Item extends Model
             EffectDefinition::class,
             'source'
         )->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un oggetto può permettere diversi lanci di incantesimo
+    public function spellCastings(): HasMany
+    {
+        return $this->hasMany(ItemSpellCasting::class)
+            ->orderBy('sort_order');
+    }
+
+    //Relazione molti-a-molti (BelongsToMany):
+    //un oggetto può permettere di lanciare molti incantesimi
+    public function spells(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Spell::class,
+            'item_spell_castings'
+        )
+            ->withPivot([
+                'id',
+                'key',
+                'item_resource_id',
+                'activation_type',
+                'activation_value',
+                'resource_cost',
+                'cast_at_level',
+                'save_dc',
+                'spell_attack_bonus',
+                'requires_components',
+                'requires_concentration',
+                'condition',
+                'description',
+                'sort_order',
+                'notes',
+            ])
+            ->withTimestamps();
+    }
+
+    //Relazione uno-a-uno (HasOne):
+    //un oggetto può definire le regole di un consumabile
+    public function consumableProfile(): HasOne
+    {
+        return $this->hasOne(ItemConsumableProfile::class);
+    }
+
+    //Relazione uno-a-uno (HasOne):
+    //un oggetto può definire le capacità di un contenitore
+    public function containerProfile(): HasOne
+    {
+        return $this->hasOne(ItemContainerProfile::class);
+    }
+
+    //Relazione uno-a-molti (HasMany):
+    //un oggetto magico può essere applicabile a diversi oggetti base
+    public function magicApplicabilities(): HasMany
+    {
+        return $this->hasMany(ItemMagicApplicability::class)
+            ->orderBy('sort_order');
     }
 }
