@@ -37,6 +37,7 @@ it('crea tutti gli incantesimi di sesto livello senza duplicati', function () {
         ->and(
             Spell::query()
                 ->where('version_key', 'phb_2014')
+                ->where('level', '<=', 6)
                 ->count()
         )->toBe(307)
         ->and($arcaneGate->name)
@@ -105,20 +106,33 @@ it('normalizza tutti i componenti materiali', function () {
     //Conta gli incantesimi PHB che dichiarano la componente M
     $materialSpellCount = Spell::query()
         ->where('version_key', 'phb_2014')
+        ->where('level', '<=', 6)
         ->where('material_component', true)
         ->count();
 
     //Cerca eventuali componenti mancanti o inattesi
     $missingDetails = Spell::query()
         ->where('version_key', 'phb_2014')
+        ->where('level', '<=', 6)
         ->where('material_component', true)
         ->whereDoesntHave('materialComponents')
         ->count();
 
     $unexpectedDetails = Spell::query()
         ->where('version_key', 'phb_2014')
+        ->where('level', '<=', 6)
         ->where('material_component', false)
         ->whereHas('materialComponents')
+        ->count();
+
+    //Conta soltanto i componenti degli incantesimi fino al 6° livello
+    $materialComponentCount = SpellMaterialComponent::query()
+        ->whereHas(
+            'spell',
+            fn ($query) => $query
+                ->where('version_key', 'phb_2014')
+                ->where('level', '<=', 6)
+        )
         ->count();
 
     //Recupera il costo variabile di Creare Non Morti
@@ -163,7 +177,7 @@ it('normalizza tutti i componenti materiali', function () {
 
     expect($materialSpellCount)
         ->toBe(170)
-        ->and(SpellMaterialComponent::query()->count())
+        ->and($materialComponentCount)
         ->toBe(176)
         ->and($missingDetails)
         ->toBe(0)
