@@ -421,7 +421,13 @@ return [
         'verbal_component' => true,
         'somatic_component' => true,
         'description' => 'Rivela la presenza generale delle trappole entro gittata e linea di vista, senza indicarne necessariamente posizione e natura.',
-        'target' => ['target_type' => 'area', 'area_shape' => 'special', 'area_size_meters' => 36.576, 'requires_sight' => true],
+        'target' => [
+            'target_type' => 'area',
+            'area_shape' => 'special',
+            'area_size_meters' => 36.576,
+            'requires_sight' => true,
+            'notes' => 'Rileva la presenza di trappole entro 36,576 metri e in linea di vista; l’area non possiede una forma geometrica standard.',
+],
     ]),
 
     $spell([

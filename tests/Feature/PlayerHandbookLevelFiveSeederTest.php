@@ -37,6 +37,7 @@ it('crea tutti gli incantesimi di quinto livello senza duplicati', function () {
         ->and(
             Spell::query()
                 ->where('version_key', 'phb_2014')
+                ->where('level', '<=', 5)
                 ->count()
         )->toBe(275)
         ->and($animateObjects->name)
@@ -99,23 +100,36 @@ it('salva aree tempi di lancio e rituali', function () {
 
 //Verifica i componenti materiali semplici e misti
 it('normalizza tutti i componenti materiali', function () {
-    //Conta gli incantesimi che dichiarano la componente M
+    //Conta gli incantesimi fino al 5° livello con componente M
     $materialSpellCount = Spell::query()
         ->where('version_key', 'phb_2014')
+        ->where('level', '<=', 5)
         ->where('material_component', true)
         ->count();
 
     //Cerca eventuali componenti mancanti o inattesi
     $missingDetails = Spell::query()
         ->where('version_key', 'phb_2014')
+        ->where('level', '<=', 5)
         ->where('material_component', true)
         ->whereDoesntHave('materialComponents')
         ->count();
 
     $unexpectedDetails = Spell::query()
         ->where('version_key', 'phb_2014')
+        ->where('level', '<=', 5)
         ->where('material_component', false)
         ->whereHas('materialComponents')
+        ->count();
+
+    //Conta soltanto i componenti degli incantesimi fino al 5° livello
+    $materialComponentCount = SpellMaterialComponent::query()
+        ->whereHas(
+            'spell',
+            fn ($query) => $query
+                ->where('version_key', 'phb_2014')
+                ->where('level', '<=', 5)
+        )
         ->count();
 
     //Recupera il caso con costi e consumi differenti
@@ -140,7 +154,7 @@ it('normalizza tutti i componenti materiali', function () {
 
     expect($materialSpellCount)
         ->toBe(148)
-        ->and(SpellMaterialComponent::query()->count())
+        ->and($materialComponentCount)
         ->toBe(149)
         ->and($missingDetails)
         ->toBe(0)

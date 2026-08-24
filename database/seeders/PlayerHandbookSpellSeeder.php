@@ -79,6 +79,11 @@ class PlayerHandbookSpellSeeder extends Seeder
             require database_path(
                 'data/phb_2014_level_5_spells.php'
             ),
+
+            //Carica gli incantesimi di 6° livello
+            require database_path(
+                'data/phb_2014_level_6_spells.php'
+            ),
         ];
 
         //Inserisce ogni gruppo di incantesimi

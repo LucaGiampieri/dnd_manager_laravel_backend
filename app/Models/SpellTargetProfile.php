@@ -92,14 +92,33 @@ class SpellTargetProfile extends Model
                 $hasSecondaryAreaSize =
                     $profile->area_secondary_size_meters !== null;
 
-                //Un bersaglio ad area richiede forma e dimensione
+                //Le aree normali devono indicare forma e dimensione.
+                //Le aree speciali possono non avere una misura unica,
+                //ma devono essere spiegate dettagliatamente nelle note.
                 if (
                     $isArea
-                    && (! $hasAreaShape || ! $hasAreaSize)
+                    && (
+                        ! $hasAreaShape
+                        || (
+                            $profile->area_shape !== 'special'
+                            && ! $hasAreaSize
+                        )
+                    )
                 ) {
                     throw new InvalidArgumentException(
-                        'Un incantesimo ad area deve indicare '
-                        . 'forma e dimensione.'
+                        'Un incantesimo ad area deve indicare una forma '
+                        . 'e, salvo le aree speciali, una dimensione.'
+                    );
+                }
+
+                //Una area speciale senza dimensioni deve essere descritta
+                if (
+                    $isArea
+                    && $profile->area_shape === 'special'
+                    && blank($profile->notes)
+                ) {
+                    throw new InvalidArgumentException(
+                        'Una area speciale deve essere descritta nelle note.'
                     );
                 }
 
