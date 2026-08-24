@@ -30,6 +30,12 @@ class XanatharsGuideSpellSeeder extends OfficialSpellSeeder
 
                 //Carica gli incantesimi di 4° livello
                 'data/xgte_2017_level_4_spells.php',
+
+                //Carica gli incantesimi di 5° livello
+                'data/xgte_2017_level_5_spells.php',
+
+                //Carica gli incantesimi di 6° livello
+                'data/xgte_2017_level_6_spells.php',
             ],
         ]);
     }
