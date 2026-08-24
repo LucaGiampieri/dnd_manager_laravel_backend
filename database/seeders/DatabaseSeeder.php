@@ -43,6 +43,9 @@ class DatabaseSeeder extends Seeder
             //Crea gli incantesimi del Manuale del Giocatore 2014
             PlayerHandbookSpellSeeder::class,
 
+            //Crea gli incantesimi della Guida di Xanathar
+            XanatharsGuideSpellSeeder::class,
+
             //Crea valute e cataloghi dell'equipaggiamento
             CurrencySeeder::class,
             ItemTypeSeeder::class,

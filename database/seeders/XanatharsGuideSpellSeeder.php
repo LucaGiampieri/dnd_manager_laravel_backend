@@ -1,0 +1,36 @@
+<?php
+
+namespace Database\Seeders;
+
+class XanatharsGuideSpellSeeder extends OfficialSpellSeeder
+{
+    //Inserisce gli incantesimi della Guida Omnicomprensiva di Xanathar
+    public function run(): void
+    {
+        $this->seedOfficialSpellCatalog([
+            'source_book_slug' => 'xgte-2017',
+            'version_key' => 'xgte_2017',
+            'reference_key' => 'xgte_2017_it_spell_definition',
+            'section' => 'Capitolo 3: Incantesimi',
+            'source_notes' => 'Riferimento bibliografico alla '
+                . 'versione italiana della Guida Omnicomprensiva '
+                . 'di Xanathar.',
+            'data_files' => [
+                //Carica i trucchetti di Xanathar
+                'data/xgte_2017_cantrips.php',
+
+                //Carica gli incantesimi di 1° livello
+                'data/xgte_2017_level_1_spells.php',
+
+                //Carica gli incantesimi di 2° livello
+                'data/xgte_2017_level_2_spells.php',
+
+                //Carica gli incantesimi di 3° livello
+                'data/xgte_2017_level_3_spells.php',
+
+                //Carica gli incantesimi di 4° livello
+                'data/xgte_2017_level_4_spells.php',
+            ],
+        ]);
+    }
+}
