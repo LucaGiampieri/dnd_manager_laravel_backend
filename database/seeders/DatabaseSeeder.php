@@ -46,6 +46,9 @@ class DatabaseSeeder extends Seeder
             //Crea gli incantesimi della Guida di Xanathar
             XanatharsGuideSpellSeeder::class,
 
+            //Crea gli incantesimi del Calderone Omnicomprensivo di Tasha
+            TashasCauldronSpellSeeder::class,
+
             //Crea valute e cataloghi dell'equipaggiamento
             CurrencySeeder::class,
             ItemTypeSeeder::class,

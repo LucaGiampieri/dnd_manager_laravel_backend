@@ -61,7 +61,7 @@ class Spell extends Model
             'somatic_component' => 'boolean',
             'material_component' => 'boolean',
             'material_consumed' => 'boolean',
-            'material_cost' => 'integer',
+            'material_cost' => 'float',
             'duration_value' => 'integer',
             'concentration' => 'boolean',
             'ritual' => 'boolean',
