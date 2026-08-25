@@ -23,6 +23,7 @@ $defaults = [
     'save_success_damage' => null,
     'higher_levels' => null,
     'notes' => null,
+    'effects' => [],
 ];
 
 //Completa i dati e il profilo del bersaglio di ogni incantesimo
@@ -54,6 +55,33 @@ $meleeWeapon = [[
     'focus_replaceable' => false,
 ]];
 
+//Genera le soglie di crescita dei dadi dei trucchetti
+$cantripScaling = function (array $diceByLevel): array {
+    $levels = array_keys($diceByLevel);
+    $scalings = [];
+
+    foreach ($levels as $index => $level) {
+        $nextLevel = $levels[$index + 1] ?? null;
+
+        $scalings[] = [
+            'key' => "character_level_{$level}",
+            'target_field' => 'dice_count',
+            'source_type' => 'character_level',
+            'operation' => 'set',
+            'minimum_source' => $level,
+            'maximum_source' => $nextLevel === null
+                ? null
+                : $nextLevel - 1,
+            'multiplier' => 0,
+            'flat_value' => $diceByLevel[$level],
+            'condition' => "Dal livello {$level} del personaggio.",
+            'sort_order' => $index + 1,
+        ];
+    }
+
+    return $scalings;
+};
+
 //Restituisce i 5 trucchetti definiti nel Calderone di Tasha
 return [
     $spell([
@@ -75,13 +103,82 @@ return [
             . 'l’arma usata come componente e avvolge il bersaglio '
             . 'in energia roboante che lo punisce se si muove.',
         'higher_levels' => 'I danni da tuono dell’attacco e del '
-            . 'movimento aumentano al 5°, 11° e 17° livello.',
+            . 'movimento diventano rispettivamente 1d8 e 2d8 al '
+            . '5° livello, 2d8 e 3d8 all’11° e 3d8 e 4d8 al 17°.',
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
             'notes' => 'La creatura deve trovarsi entro 1,524 metri '
                 . 'dall’incantatore.',
+        ],
+        'effects' => [
+            [
+                'key' => 'weapon_attack',
+                'name' => 'Attacco con l’arma',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'description' => 'Il bersaglio subisce i normali '
+                    . 'effetti dell’attacco con l’arma usata come '
+                    . 'componente materiale.',
+                'sort_order' => 1,
+                'damages' => [
+                    [
+                        'key' => 'thunder_on_hit',
+                        'damage_type' => 'Tuono',
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'is_primary' => false,
+                        'condition' => 'Si applica soltanto dal 5° '
+                            . 'livello del personaggio.',
+                        'sort_order' => 1,
+                        'scalings' => $cantripScaling([
+                            11 => 2,
+                            17 => 3,
+                        ]),
+                    ],
+                ],
+            ],
+            [
+                'key' => 'booming_energy',
+                'name' => 'Energia roboante',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => false,
+                'condition' => 'Dopo che l’attacco con l’arma colpisce.',
+                'description' => 'Se il bersaglio si muove '
+                    . 'volontariamente di almeno 1,5 metri, subisce '
+                    . 'danni da tuono.',
+                'sort_order' => 2,
+                'damages' => [
+                    [
+                        'key' => 'thunder_on_move',
+                        'damage_type' => 'Tuono',
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'is_primary' => true,
+                        'condition' => 'Il bersaglio si muove '
+                            . 'volontariamente di almeno 1,5 metri '
+                            . 'prima dell’inizio del turno successivo '
+                            . 'dell’incantatore.',
+                        'sort_order' => 1,
+                        'scalings' => $cantripScaling([
+                            5 => 2,
+                            11 => 3,
+                            17 => 4,
+                        ]),
+                    ],
+                ],
+                'durations' => [
+                    [
+                        'key' => 'until_caster_next_turn',
+                        'duration_type' => 'until_start_turn',
+                        'turn_reference' => 'source',
+                        'condition' => 'Termina all’inizio del turno '
+                            . 'successivo dell’incantatore.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -102,7 +199,8 @@ return [
             . 'l’arma usata come componente e può far balzare una '
             . 'fiamma verde su una seconda creatura vicina.',
         'higher_levels' => 'I danni da fuoco inflitti al primo e al '
-            . 'secondo bersaglio aumentano al 5°, 11° e 17° livello.',
+            . 'secondo bersaglio aumentano di 1d8 al 5°, 11° e '
+            . '17° livello.',
         'target' => [
             'target_type' => 'creatures',
             'target_count' => 2,
@@ -110,6 +208,73 @@ return [
             'notes' => 'Il primo bersaglio deve trovarsi entro '
                 . '1,524 metri; il secondo deve essere visibile e '
                 . 'trovarsi entro 1,524 metri dal primo.',
+        ],
+        'effects' => [
+            [
+                'key' => 'weapon_attack',
+                'name' => 'Attacco con l’arma',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'description' => 'Il primo bersaglio subisce i '
+                    . 'normali effetti dell’attacco con l’arma.',
+                'sort_order' => 1,
+                'damages' => [
+                    [
+                        'key' => 'primary_fire',
+                        'damage_type' => 'Fuoco',
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'condition' => 'Si applica soltanto dal 5° '
+                            . 'livello del personaggio.',
+                        'sort_order' => 1,
+                        'scalings' => $cantripScaling([
+                            11 => 2,
+                            17 => 3,
+                        ]),
+                    ],
+                ],
+            ],
+            [
+                'key' => 'green_flame_jump',
+                'name' => 'Balzo della fiamma verde',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'condition' => 'Una seconda creatura scelta '
+                    . 'dall’incantatore è visibile entro 1,5 metri '
+                    . 'dal primo bersaglio.',
+                'description' => 'La seconda creatura subisce danni '
+                    . 'da fuoco pari al modificatore della '
+                    . 'caratteristica da incantatore, più i dadi '
+                    . 'ottenuti con la crescita del trucchetto.',
+                'sort_order' => 2,
+                'damages' => [
+                    [
+                        'key' => 'secondary_spellcasting_modifier',
+                        'damage_type' => 'Fuoco',
+                        'modifier_source_type' =>
+                            'caster_ability_modifier',
+                        'modifier_multiplier' => 1,
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'notes' => 'Usa la caratteristica da '
+                            . 'incantatore impiegata per lanciare '
+                            . 'l’incantesimo.',
+                    ],
+                    [
+                        'key' => 'secondary_fire_dice',
+                        'damage_type' => 'Fuoco',
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'condition' => 'Si applica soltanto dal 5° '
+                            . 'livello del personaggio.',
+                        'sort_order' => 2,
+                        'scalings' => $cantripScaling([
+                            11 => 2,
+                            17 => 3,
+                        ]),
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -126,13 +291,57 @@ return [
             . 'verso l’incantatore e la danneggia se arriva abbastanza '
             . 'vicino a lui.',
         'higher_levels' => 'I danni da fulmine aumentano al 5°, 11° '
-            . 'e 17° livello.',
+            . 'e 17° livello, diventando rispettivamente 2d8, 3d8 '
+            . 'e 4d8.',
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
             'notes' => 'Il bersaglio deve trovarsi entro 4,572 metri '
                 . 'dall’incantatore.',
+        ],
+        'effects' => [
+            [
+                'key' => 'failed_strength_save',
+                'name' => 'Trazione elettrizzante',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'description' => 'Il bersaglio viene trascinato verso '
+                    . 'l’incantatore e può subire danni da fulmine.',
+                'damages' => [
+                    [
+                        'key' => 'lightning_damage',
+                        'damage_type' => 'Fulmine',
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'is_primary' => true,
+                        'condition' => 'Dopo la trazione il bersaglio '
+                            . 'si trova entro 1,5 metri '
+                            . 'dall’incantatore.',
+                        'scalings' => $cantripScaling([
+                            5 => 2,
+                            11 => 3,
+                            17 => 4,
+                        ]),
+                    ],
+                ],
+                'forced_movements' => [
+                    [
+                        'key' => 'pull_toward_caster',
+                        'movement_type' => 'pull',
+                        'origin_type' => 'source',
+                        'direction_type' => 'toward_origin',
+                        'distance' => 3.048,
+                        'up_to_distance' => true,
+                        'straight_line' => true,
+                        'stops_at_obstacle' => true,
+                        'opportunity_attack_rule' =>
+                            'does_not_provoke',
+                        'notes' => 'La distanza massima ufficiale '
+                            . 'è 3 metri nella traduzione italiana.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -151,11 +360,65 @@ return [
             . 'infliggendo danni psichici e sottraendo 1d4 al suo '
             . 'prossimo tiro salvezza prima della fine dell’effetto.',
         'higher_levels' => 'I danni psichici aumentano al 5°, 11° '
-            . 'e 17° livello.',
+            . 'e 17° livello, diventando rispettivamente 2d6, 3d6 '
+            . 'e 4d6.',
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
+        ],
+        'effects' => [
+            [
+                'key' => 'psychic_damage',
+                'name' => 'Danno psichico',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'damages' => [
+                    [
+                        'key' => 'mind_sliver_damage',
+                        'damage_type' => 'Psichico',
+                        'dice_count' => 1,
+                        'die_size' => 6,
+                        'is_primary' => true,
+                        'scalings' => $cantripScaling([
+                            5 => 2,
+                            11 => 3,
+                            17 => 4,
+                        ]),
+                    ],
+                ],
+                'sort_order' => 1,
+            ],
+            [
+                'key' => 'saving_throw_penalty',
+                'name' => 'Penalità al prossimo tiro salvezza',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => false,
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'saving_throw',
+                        'modifier_type' => 'penalty',
+                        'dice_count' => 1,
+                        'die_size' => 4,
+                        'condition' => 'Si applica soltanto al primo '
+                            . 'tiro salvezza effettuato dal bersaglio.',
+                        'sort_order' => 1,
+                        'notes' => 'Sottrae il risultato di 1d4.',
+                    ],
+                ],
+                'durations' => [
+                    [
+                        'key' => 'until_caster_next_turn_end',
+                        'duration_type' => 'until_end_turn',
+                        'turn_reference' => 'source',
+                        'condition' => 'Termina dopo il primo tiro '
+                            . 'salvezza interessato o alla fine del '
+                            . 'turno successivo dell’incantatore.',
+                    ],
+                ],
+                'sort_order' => 2,
+            ],
         ],
     ]),
 
@@ -172,13 +435,38 @@ return [
             . 'spettrali che infligge danni da forza alle creature '
             . 'attorno all’incantatore.',
         'higher_levels' => 'I danni da forza aumentano al 5°, 11° '
-            . 'e 17° livello.',
+            . 'e 17° livello, diventando rispettivamente 2d6, 3d6 '
+            . 'e 4d6.',
         'target' => [
             'target_type' => 'area',
             'area_shape' => 'emanation',
             'area_size_meters' => 1.524,
             'can_target_self' => false,
             'notes' => 'L’emanazione esclude l’incantatore.',
+        ],
+        'effects' => [
+            [
+                'key' => 'failed_dexterity_save',
+                'name' => 'Danno delle spade spettrali',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'condition' => 'Ogni altra creatura nell’area che '
+                    . 'fallisce il tiro salvezza su Destrezza.',
+                'damages' => [
+                    [
+                        'key' => 'force_damage',
+                        'damage_type' => 'Forza',
+                        'dice_count' => 1,
+                        'die_size' => 6,
+                        'is_primary' => true,
+                        'scalings' => $cantripScaling([
+                            5 => 2,
+                            11 => 3,
+                            17 => 4,
+                        ]),
+                    ],
+                ],
+            ],
         ],
     ]),
 ];

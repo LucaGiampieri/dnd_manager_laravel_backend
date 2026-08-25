@@ -46,13 +46,11 @@ class EffectDefinitionRollModifier extends Model
             //Applica l'ordine predefinito ai nuovi modelli
             $modifier->sort_order ??= 0;
 
-            //I modificatori numerici devono indicare un valore
+            //Set, minimo e massimo richiedono sempre un valore fisso
             if (
                 in_array(
                     $modifier->modifier_type,
                     [
-                        'bonus',
-                        'penalty',
                         'set',
                         'minimum',
                         'maximum',
@@ -96,6 +94,22 @@ class EffectDefinitionRollModifier extends Model
             ) {
                 throw new InvalidArgumentException(
                     'Il dado del modificatore non è valido.'
+                );
+            }
+
+            //Bonus e penalità possono usare un valore oppure un dado
+            if (
+                in_array(
+                    $modifier->modifier_type,
+                    ['bonus', 'penalty'],
+                    true
+                )
+                && $modifier->value === null
+                && ! $hasDiceCount
+            ) {
+                throw new InvalidArgumentException(
+                    'Un bonus o una penalità deve indicare '
+                    . 'un valore oppure un dado.'
                 );
             }
         });

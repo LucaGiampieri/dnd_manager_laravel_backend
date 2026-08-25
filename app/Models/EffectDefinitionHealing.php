@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use InvalidArgumentException;
 
 class EffectDefinitionHealing extends Model
@@ -34,7 +35,7 @@ class EffectDefinitionHealing extends Model
             'effect_definition_id' => 'integer',
             'dice_count' => 'integer',
             'die_size' => 'integer',
-            'flat_bonus' => 'integer',
+            'flat_bonus' => 'float',
             'modifier_ability_id' => 'integer',
             'modifier_multiplier' => 'float',
             'average_healing' => 'float',
@@ -111,7 +112,7 @@ class EffectDefinitionHealing extends Model
             //La formula deve produrre almeno un valore di guarigione
             if (
                 ! $hasDiceCount
-                && $healing->flat_bonus === 0
+                && (float) $healing->flat_bonus === 0.0
                 && $healing->modifier_source_type === 'none'
             ) {
                 throw new InvalidArgumentException(
@@ -119,6 +120,13 @@ class EffectDefinitionHealing extends Model
                     . 'o un modificatore.'
                 );
             }
+        });
+
+        static::deleting(function (
+            EffectDefinitionHealing $healing
+        ): void {
+            //Le progressioni polimorfiche non possiedono una FK
+            $healing->scalings()->delete();
         });
     }
 
@@ -137,5 +145,14 @@ class EffectDefinitionHealing extends Model
             Ability::class,
             'modifier_ability_id'
         );
+    }
+
+    //Relazione polimorfica: una cura può avere più progressioni
+    public function scalings(): MorphMany
+    {
+        return $this->morphMany(
+            EffectDefinitionScaling::class,
+            'scalable'
+        )->orderBy('sort_order');
     }
 }

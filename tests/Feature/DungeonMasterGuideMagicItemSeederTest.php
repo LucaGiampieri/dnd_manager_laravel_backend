@@ -52,25 +52,25 @@ it('salva le formule delle pozioni di guarigione', function () {
         'potion_of_healing' => [
             2,
             4,
-            2,
+            2.0,
             7.0,
         ],
         'potion_of_greater_healing' => [
             4,
             4,
-            4,
+            4.0,
             14.0,
         ],
         'potion_of_superior_healing' => [
             8,
             4,
-            8,
+            8.0,
             28.0,
         ],
         'potion_of_supreme_healing' => [
             10,
             4,
-            20,
+            20.0,
             45.0,
         ],
     ];

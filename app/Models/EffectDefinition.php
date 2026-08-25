@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class EffectDefinition extends Model
@@ -34,6 +35,34 @@ class EffectDefinition extends Model
         ];
     }
 
+    //Pulisce gli elementi polimorfici prima di eliminare l'effetto
+    protected static function booted(): void
+    {
+        static::deleting(function (
+            EffectDefinition $effect
+        ): void {
+            //I modelli vengono eliminati singolarmente per attivare
+            //la pulizia delle loro progressioni polimorfiche
+            $effect->damages()
+                ->get()
+                ->each(function (
+                    EffectDefinitionDamage $damage
+                ): void {
+                    $damage->delete();
+                });
+
+            $effect->healings()
+                ->get()
+                ->each(function (
+                    EffectDefinitionHealing $healing
+                ): void {
+                    $healing->delete();
+                });
+
+            $effect->scalings()->delete();
+        });
+    }
+
     //Relazione polimorfica molti-a-uno (MorphTo):
     //ogni effetto può essere definito da una fonte di tipo variabile
     public function source(): MorphTo
@@ -48,6 +77,14 @@ class EffectDefinition extends Model
         return $this->hasMany(
             EffectDefinitionMovementCostModifier::class
         );
+    }
+
+    //Relazione uno-a-molti: un effetto può infliggere più danni
+    public function damages(): HasMany
+    {
+        return $this->hasMany(
+            EffectDefinitionDamage::class
+        )->orderBy('sort_order');
     }
 
     //Relazione uno-a-molti (HasMany):
@@ -65,6 +102,31 @@ class EffectDefinition extends Model
     {
         return $this->hasMany(
             EffectDefinitionRollModifier::class
+        )->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti: un effetto può spostare più bersagli
+    public function forcedMovements(): HasMany
+    {
+        return $this->hasMany(
+            EffectDefinitionForcedMovement::class
+        )->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti: un effetto può avere regole di durata
+    public function durations(): HasMany
+    {
+        return $this->hasMany(
+            EffectDefinitionDuration::class
+        )->orderBy('sort_order');
+    }
+
+    //Relazione polimorfica: anche un effetto può essere scalabile
+    public function scalings(): MorphMany
+    {
+        return $this->morphMany(
+            EffectDefinitionScaling::class,
+            'scalable'
         )->orderBy('sort_order');
     }
 }

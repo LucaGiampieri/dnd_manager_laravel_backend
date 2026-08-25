@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasSourceReferences;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DamageType extends Model
 {
@@ -15,4 +16,10 @@ class DamageType extends Model
         'name',
         'description',
     ];
+
+    //Relazione uno-a-molti: un tipo può essere usato da molti effetti
+    public function effectDefinitionDamages(): HasMany
+    {
+        return $this->hasMany(EffectDefinitionDamage::class);
+    }
 }
