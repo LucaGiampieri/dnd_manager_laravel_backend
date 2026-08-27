@@ -168,6 +168,33 @@ class CreatureStatBlock extends Model
         );
     }
 
+    //Relazione uno-a-molti:
+    //uno stat block può possedere più modalità di movimento
+    public function movements(): HasMany
+    {
+        return $this->hasMany(
+            CreatureStatBlockMovement::class
+        );
+    }
+
+    //Relazione uno-a-molti:
+    //uno stat block può possedere azioni, reazioni e azioni bonus
+    public function actions(): HasMany
+    {
+        return $this->hasMany(
+            CreatureStatBlockAction::class
+        )->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti:
+    //uno stat block può essere usato da una forma evocata
+    public function summonTemplateForms(): HasMany
+    {
+        return $this->hasMany(
+            SpellSummonTemplateForm::class
+        );
+    }
+
     //Relazione molti-a-molti (BelongsToMany):
     //uno stat block può ammettere più allineamenti
     public function alignments(): BelongsToMany

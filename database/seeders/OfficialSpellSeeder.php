@@ -3,15 +3,24 @@
 namespace Database\Seeders;
 
 use App\Models\Ability;
+use App\Models\CreatureStatBlock;
+use App\Models\CreatureStatBlockAction;
+use App\Models\CreatureType;
 use App\Models\Currency;
 use App\Models\DamageType;
 use App\Models\EffectDefinition;
 use App\Models\EffectDefinitionDamage;
 use App\Models\EffectDefinitionHealing;
+use App\Models\EffectDefinitionRollModifier;
+use App\Models\MovementType;
 use App\Models\Ruleset;
+use App\Models\Size;
 use App\Models\SourceBook;
 use App\Models\Spell;
 use App\Models\SpellSchool;
+use App\Models\SpellSummon;
+use App\Models\SpellSummonTemplate;
+use App\Models\SpellSummonTemplateForm;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use RuntimeException;
@@ -42,6 +51,9 @@ abstract class OfficialSpellSeeder extends Seeder
             CurrencySeeder::class,
             SpellSchoolSeeder::class,
             DamageTypeSeeder::class,
+            CreatureTypeSeeder::class,
+            SizeSeeder::class,
+            MovementTypeSeeder::class,
         ]);
 
         //Recupera il regolamento D&D 5e del 2014
@@ -59,6 +71,9 @@ abstract class OfficialSpellSeeder extends Seeder
         $abilities = Ability::query()->pluck('id', 'short_name');
         $currencies = Currency::query()->pluck('id', 'code');
         $damageTypes = DamageType::query()->pluck('id', 'name');
+        $creatureTypes = CreatureType::query()->pluck('id', 'key');
+        $sizes = Size::query()->pluck('id', 'name');
+        $movementTypes = MovementType::query()->pluck('id', 'name');
 
         foreach ($configuration['data_files'] as $dataFile) {
             $spellData = require database_path($dataFile);
@@ -72,7 +87,10 @@ abstract class OfficialSpellSeeder extends Seeder
                     $schools,
                     $abilities,
                     $currencies,
-                    $damageTypes
+                    $damageTypes,
+                    $creatureTypes,
+                    $sizes,
+                    $movementTypes
                 );
             }
         }
@@ -89,7 +107,10 @@ abstract class OfficialSpellSeeder extends Seeder
         Collection $schools,
         Collection $abilities,
         Collection $currencies,
-        Collection $damageTypes
+        Collection $damageTypes,
+        Collection $creatureTypes,
+        Collection $sizes,
+        Collection $movementTypes
     ): void {
         $schoolId = $schools->get($data['school_key']);
 
@@ -195,6 +216,16 @@ abstract class OfficialSpellSeeder extends Seeder
             $data,
             $abilities,
             $damageTypes
+        );
+
+        $this->syncSummons(
+            $spell,
+            $data,
+            $abilities,
+            $damageTypes,
+            $creatureTypes,
+            $sizes,
+            $movementTypes
         );
 
         //Collega l'incantesimo alla pagina del manuale
@@ -576,7 +607,11 @@ abstract class OfficialSpellSeeder extends Seeder
             $obsoleteModifiers->whereNotIn('sort_order', $sortOrders);
         }
 
-        $obsoleteModifiers->delete();
+        $obsoleteModifiers->get()->each(function (
+            EffectDefinitionRollModifier $modifier
+        ): void {
+            $modifier->delete();
+        });
 
         foreach ($modifiers as $modifierData) {
             $sortOrder = $modifierData['sort_order'] ?? 0;
@@ -586,7 +621,7 @@ abstract class OfficialSpellSeeder extends Seeder
                 $spellKey
             );
 
-            $effect->rollModifiers()->updateOrCreate(
+            $modifier = $effect->rollModifiers()->updateOrCreate(
                 ['sort_order' => $sortOrder],
                 [
                     'roll_type' => $modifierData['roll_type'],
@@ -600,6 +635,14 @@ abstract class OfficialSpellSeeder extends Seeder
                     'condition' => $modifierData['condition'] ?? null,
                     'notes' => $modifierData['notes'] ?? null,
                 ]
+            );
+
+            //Riusa la tabella polimorfica già presente per le progressioni.
+            $this->syncScalings(
+                $modifier,
+                $modifierData['scalings'] ?? [],
+                $abilities,
+                $spellKey
             );
         }
     }
@@ -689,7 +732,7 @@ abstract class OfficialSpellSeeder extends Seeder
 
     //Sincronizza una progressione matematica polimorfica
     private function syncScalings(
-        EffectDefinition|EffectDefinitionDamage|EffectDefinitionHealing $scalable,
+        EffectDefinition|EffectDefinitionDamage|EffectDefinitionHealing|EffectDefinitionRollModifier $scalable,
         array $scalings,
         Collection $abilities,
         string $spellKey
@@ -746,6 +789,809 @@ abstract class OfficialSpellSeeder extends Seeder
         }
     }
 
+    //Sincronizza le evocazioni e gli stat block dichiarati nel file dati
+    private function syncSummons(
+        Spell $spell,
+        array $data,
+        Collection $abilities,
+        Collection $damageTypes,
+        Collection $creatureTypes,
+        Collection $sizes,
+        Collection $movementTypes
+    ): void {
+        //I cataloghi precedenti rimangono invariati se non dichiarano
+        //esplicitamente la sezione summons
+        if (! array_key_exists('summons', $data)) {
+            return;
+        }
+
+        $summons = $data['summons'];
+        $summonNames = $this->uniqueNames(
+            $summons,
+            "le evocazioni dell'incantesimo {$data['key']}"
+        );
+
+        //Elimina attraverso i modelli le evocazioni non più presenti,
+        //così vengono puliti anche gli stat block dedicati
+        $obsoleteSummons = $spell->summons();
+
+        if ($summonNames !== []) {
+            $obsoleteSummons->whereNotIn('name', $summonNames);
+        }
+
+        $obsoleteSummons->get()->each(function (
+            SpellSummon $summon
+        ): void {
+            $summon->delete();
+        });
+
+        foreach ($summons as $summonData) {
+            $summon = $spell->summons()->updateOrCreate(
+                ['name' => $summonData['name']],
+                [
+                    'selection_type' =>
+                        $summonData['selection_type'] ?? 'special',
+                    'quantity_type' =>
+                        $summonData['quantity_type'] ?? 'exact',
+                    'quantity' => $summonData['quantity'] ?? 1,
+                    'min_challenge_rating' =>
+                        $summonData['min_challenge_rating'] ?? null,
+                    'max_challenge_rating' =>
+                        $summonData['max_challenge_rating'] ?? null,
+                    'controlled_by_caster' =>
+                        $summonData['controlled_by_caster'] ?? true,
+                    'friendly_to_caster' =>
+                        $summonData['friendly_to_caster'] ?? true,
+                    'ends_with_spell' =>
+                        $summonData['ends_with_spell'] ?? true,
+                    'selection_condition' =>
+                        $summonData['selection_condition'] ?? null,
+                    'control_rules' =>
+                        $summonData['control_rules'] ?? null,
+                    'sort_order' => $summonData['sort_order'] ?? 0,
+                    'notes' => $summonData['notes'] ?? null,
+                ]
+            );
+
+            $this->syncSummonTemplates(
+                $summon,
+                $summonData['templates'] ?? [],
+                $abilities,
+                $damageTypes,
+                $creatureTypes,
+                $sizes,
+                $movementTypes,
+                $data['key']
+            );
+        }
+    }
+
+    //Sincronizza i template appartenenti a una evocazione
+    private function syncSummonTemplates(
+        SpellSummon $summon,
+        array $templates,
+        Collection $abilities,
+        Collection $damageTypes,
+        Collection $creatureTypes,
+        Collection $sizes,
+        Collection $movementTypes,
+        string $spellKey
+    ): void {
+        $templateNames = $this->uniqueNames(
+            $templates,
+            "i template evocati dell'incantesimo {$spellKey}"
+        );
+
+        $obsoleteTemplates = $summon->templates();
+
+        if ($templateNames !== []) {
+            $obsoleteTemplates->whereNotIn('name', $templateNames);
+        }
+
+        $obsoleteTemplates->get()->each(function (
+            SpellSummonTemplate $template
+        ): void {
+            $template->delete();
+        });
+
+        foreach ($templates as $templateData) {
+            $creatureTypeId = $creatureTypes->get(
+                $templateData['creature_type_key']
+            );
+            $sizeId = $sizes->get($templateData['size_name']);
+
+            if ($creatureTypeId === null) {
+                throw new RuntimeException(
+                    "Tipo di creatura {$templateData['creature_type_key']} "
+                    . "non trovato per l'incantesimo {$spellKey}."
+                );
+            }
+
+            if ($sizeId === null) {
+                throw new RuntimeException(
+                    "Taglia {$templateData['size_name']} non trovata per "
+                    . "l'incantesimo {$spellKey}."
+                );
+            }
+
+            $template = $summon->templates()->updateOrCreate(
+                ['name' => $templateData['name']],
+                [
+                    'creature_type_id' => $creatureTypeId,
+                    'size_id' => $sizeId,
+                    'description' =>
+                        $templateData['description'] ?? null,
+                    'sort_order' => $templateData['sort_order'] ?? 0,
+                    'notes' => $templateData['notes'] ?? null,
+                ]
+            );
+
+            $this->syncSummonForms(
+                $template,
+                $templateData['forms'] ?? [],
+                $templateData,
+                $abilities,
+                $damageTypes,
+                $creatureTypes,
+                $sizes,
+                $movementTypes,
+                $spellKey
+            );
+        }
+    }
+
+    //Sincronizza le forme alternative di uno stat block evocato
+    private function syncSummonForms(
+        SpellSummonTemplate $template,
+        array $forms,
+        array $templateData,
+        Collection $abilities,
+        Collection $damageTypes,
+        Collection $creatureTypes,
+        Collection $sizes,
+        Collection $movementTypes,
+        string $spellKey
+    ): void {
+        $formNames = $this->uniqueNames(
+            $forms,
+            "le forme evocate dell'incantesimo {$spellKey}"
+        );
+
+        $obsoleteForms = $template->forms();
+
+        if ($formNames !== []) {
+            $obsoleteForms->whereNotIn('name', $formNames);
+        }
+
+        $obsoleteForms->get()->each(function (
+            SpellSummonTemplateForm $form
+        ): void {
+            $form->delete();
+        });
+
+        foreach ($forms as $formData) {
+            $form = $template->forms()
+                ->where('name', $formData['name'])
+                ->first();
+
+            //Ogni forma mantiene uno stat block indipendente, perché
+            //movimenti, punti ferita e azioni possono cambiare
+            $statBlock = $form?->creatureStatBlock;
+
+            if ($statBlock === null) {
+                $statBlock = CreatureStatBlock::query()->create([
+                    'name' => $formData['stat_block']['name'],
+                    'alignment_mode' => 'unaligned',
+                ]);
+            }
+
+            $this->syncSummonedStatBlock(
+                $statBlock,
+                $formData['stat_block'],
+                $templateData,
+                $abilities,
+                $damageTypes,
+                $creatureTypes,
+                $sizes,
+                $movementTypes,
+                $spellKey
+            );
+
+            $form = $template->forms()->updateOrCreate(
+                ['name' => $formData['name']],
+                [
+                    'creature_stat_block_id' => $statBlock->id,
+                    'description' => $formData['description'] ?? null,
+                    'is_default' => $formData['is_default'] ?? false,
+                    'sort_order' => $formData['sort_order'] ?? 0,
+                    'notes' => $formData['notes'] ?? null,
+                ]
+            );
+
+            $this->syncSummonTemplateScalings(
+                $form,
+                $formData['scalings'] ?? [],
+                $statBlock,
+                $abilities,
+                $spellKey
+            );
+        }
+    }
+
+    //Sincronizza i dati principali e le azioni dello stat block evocato
+    private function syncSummonedStatBlock(
+        CreatureStatBlock $statBlock,
+        array $statData,
+        array $templateData,
+        Collection $abilities,
+        Collection $damageTypes,
+        Collection $creatureTypes,
+        Collection $sizes,
+        Collection $movementTypes,
+        string $spellKey
+    ): void {
+        $creatureTypeKey = $statData['creature_type_key']
+            ?? $templateData['creature_type_key'];
+        $sizeName = $statData['size_name']
+            ?? $templateData['size_name'];
+        $creatureTypeId = $creatureTypes->get($creatureTypeKey);
+        $sizeId = $sizes->get($sizeName);
+
+        if ($creatureTypeId === null || $sizeId === null) {
+            throw new RuntimeException(
+                "Tipo o taglia dello stat block non trovati per "
+                . "l'incantesimo {$spellKey}."
+            );
+        }
+
+        $statBlock->update([
+            'name' => $statData['name'],
+            'creature_type_id' => $creatureTypeId,
+            'size_id' => $sizeId,
+            'challenge_rating_id' => null,
+            'experience_points_override' => null,
+            'proficiency_bonus_override' => null,
+            'alignment' => null,
+            'alignment_mode' => 'unaligned',
+            'description' => $statData['description'] ?? null,
+            'notes' => $statData['notes'] ?? null,
+            'is_swarm' => false,
+            'swarm_component_size_id' => null,
+        ]);
+
+        //Punteggi delle sei caratteristiche
+        $abilityIds = [];
+
+        foreach ($statData['abilities'] ?? [] as $shortName => $score) {
+            $abilityId = $this->resolveAbilityId(
+                $shortName,
+                $abilities,
+                $spellKey
+            );
+            $abilityIds[] = $abilityId;
+
+            $statBlock->abilityScores()->updateOrCreate(
+                ['ability_id' => $abilityId],
+                [
+                    'score' => $score,
+                    'notes' => null,
+                ]
+            );
+        }
+
+        $obsoleteAbilities = $statBlock->abilityScores();
+
+        if ($abilityIds !== []) {
+            $obsoleteAbilities->whereNotIn('ability_id', $abilityIds);
+        }
+
+        $obsoleteAbilities->delete();
+
+        //Classe Armatura base, completata dalle regole di scaling
+        $armorData = $statData['armor_class'];
+        $statBlock->armorClasses()
+            ->where('sort_order', '!=', 1)
+            ->delete();
+        $statBlock->armorClasses()->updateOrCreate(
+            ['sort_order' => 1],
+            [
+                'armor_class' => $armorData['value'],
+                'armor_class_type' =>
+                    $armorData['type'] ?? 'natural_armor',
+                'is_default' => true,
+                'description' => $armorData['description'] ?? null,
+                'condition' => $armorData['condition'] ?? null,
+                'notes' => $armorData['notes'] ?? null,
+            ]
+        );
+
+        //Punti Ferita base, completati dalle regole di scaling
+        $hitPointData = $statData['hit_points'];
+        $statBlock->hitPoints()->updateOrCreate(
+            [],
+            [
+                'average_hit_points' =>
+                    $hitPointData['average_hit_points'] ?? null,
+                'hit_dice_count' => null,
+                'hit_die_size' => null,
+                'hit_dice_modifier' => 0,
+                'special_calculation' =>
+                    $hitPointData['special_calculation'] ?? null,
+                'notes' => $hitPointData['notes'] ?? null,
+            ]
+        );
+
+        $this->syncSummonedMovements(
+            $statBlock,
+            $statData['movements'] ?? [],
+            $movementTypes,
+            $spellKey
+        );
+
+        $this->syncSummonedActions(
+            $statBlock,
+            $statData['actions'] ?? [],
+            $abilities,
+            $damageTypes,
+            $spellKey
+        );
+    }
+
+    //Sincronizza le velocità dello stat block evocato
+    private function syncSummonedMovements(
+        CreatureStatBlock $statBlock,
+        array $movements,
+        Collection $movementTypes,
+        string $spellKey
+    ): void {
+        $movementTypeIds = [];
+
+        foreach ($movements as $movementData) {
+            $movementTypeId = $movementTypes->get(
+                $movementData['type']
+            );
+
+            if ($movementTypeId === null) {
+                throw new RuntimeException(
+                    "Movimento {$movementData['type']} non trovato per "
+                    . "l'incantesimo {$spellKey}."
+                );
+            }
+
+            $movementTypeIds[] = $movementTypeId;
+            $statBlock->movements()->updateOrCreate(
+                ['movement_type_id' => $movementTypeId],
+                [
+                    'speed' => $movementData['speed'],
+                    'can_hover' =>
+                        $movementData['can_hover'] ?? false,
+                    'condition' =>
+                        $movementData['condition'] ?? null,
+                    'notes' => $movementData['notes'] ?? null,
+                ]
+            );
+        }
+
+        $obsoleteMovements = $statBlock->movements();
+
+        if ($movementTypeIds !== []) {
+            $obsoleteMovements->whereNotIn(
+                'movement_type_id',
+                $movementTypeIds
+            );
+        }
+
+        $obsoleteMovements->delete();
+    }
+
+    //Sincronizza azioni, attacchi, danni e tiri salvezza dello stat block
+    private function syncSummonedActions(
+        CreatureStatBlock $statBlock,
+        array $actions,
+        Collection $abilities,
+        Collection $damageTypes,
+        string $spellKey
+    ): void {
+        $actionKeys = $this->uniqueKeys(
+            $actions,
+            "le azioni evocate dell'incantesimo {$spellKey}"
+        );
+        $obsoleteActions = $statBlock->actions();
+
+        if ($actionKeys !== []) {
+            $obsoleteActions->whereNotIn('key', $actionKeys);
+        }
+
+        $obsoleteActions->delete();
+
+        foreach ($actions as $actionData) {
+            $action = $statBlock->actions()->updateOrCreate(
+                ['key' => $actionData['key']],
+                [
+                    'name' => $actionData['name'],
+                    'action_type' =>
+                        $actionData['action_type'] ?? 'action',
+                    'description' =>
+                        $actionData['description'] ?? null,
+                    'trigger' => $actionData['trigger'] ?? null,
+                    'max_uses' => $actionData['max_uses'] ?? null,
+                    'recharge_type' =>
+                        $actionData['recharge_type'] ?? 'at_will',
+                    'recharge_min' =>
+                        $actionData['recharge_min'] ?? null,
+                    'recharge_max' =>
+                        $actionData['recharge_max'] ?? null,
+                    'legendary_action_cost' =>
+                        $actionData['legendary_action_cost'] ?? null,
+                    'condition' => $actionData['condition'] ?? null,
+                    'sort_order' => $actionData['sort_order'] ?? 0,
+                    'notes' => $actionData['notes'] ?? null,
+                ]
+            );
+
+            $this->syncSummonedAttacks(
+                $action,
+                $actionData['attacks'] ?? [],
+                $abilities,
+                $spellKey
+            );
+
+            $this->syncSummonedActionDamages(
+                $action,
+                $actionData['damages'] ?? [],
+                $damageTypes,
+                $spellKey
+            );
+
+            $this->syncSummonedSavingThrows(
+                $action,
+                $actionData['saving_throws'] ?? [],
+                $abilities,
+                $spellKey
+            );
+        }
+    }
+
+    //Sincronizza gli attacchi appartenenti a una azione evocata
+    private function syncSummonedAttacks(
+        CreatureStatBlockAction $action,
+        array $attacks,
+        Collection $abilities,
+        string $spellKey
+    ): void {
+        $attackKeys = $this->uniqueKeys(
+            $attacks,
+            "gli attacchi evocati dell'incantesimo {$spellKey}"
+        );
+        $obsoleteAttacks = $action->attacks();
+
+        if ($attackKeys !== []) {
+            $obsoleteAttacks->whereNotIn('key', $attackKeys);
+        }
+
+        $obsoleteAttacks->delete();
+
+        foreach ($attacks as $attackData) {
+            $abilityId = $this->resolveAbilityId(
+                $attackData['attack_ability'] ?? null,
+                $abilities,
+                $spellKey
+            );
+
+            $action->attacks()->updateOrCreate(
+                ['key' => $attackData['key']],
+                [
+                    'name' => $attackData['name'],
+                    'attack_type' => $attackData['attack_type'],
+                    'attack_kind' =>
+                        $attackData['attack_kind'] ?? 'weapon',
+                    'attack_bonus' =>
+                        $attackData['attack_bonus'] ?? null,
+                    'attack_ability_id' => $abilityId,
+                    'reach' => $attackData['reach'] ?? null,
+                    'range' => $attackData['range'] ?? null,
+                    'long_range' =>
+                        $attackData['long_range'] ?? null,
+                    'target_count' =>
+                        $attackData['target_count'] ?? 1,
+                    'condition' => $attackData['condition'] ?? null,
+                    'notes' => $attackData['notes'] ?? null,
+                ]
+            );
+        }
+    }
+
+    //Sincronizza le formule di danno delle azioni evocate
+    private function syncSummonedActionDamages(
+        CreatureStatBlockAction $action,
+        array $damages,
+        Collection $damageTypes,
+        string $spellKey
+    ): void {
+        $sortOrders = collect($damages)
+            ->map(fn (array $damage): int =>
+                $damage['sort_order'] ?? 0)
+            ->all();
+
+        if (count($sortOrders) !== count(array_unique($sortOrders))) {
+            throw new RuntimeException(
+                "L'incantesimo {$spellKey} contiene danni evocati "
+                . 'con lo stesso ordine.'
+            );
+        }
+
+        $obsoleteDamages = $action->damages();
+
+        if ($sortOrders !== []) {
+            $obsoleteDamages->whereNotIn('sort_order', $sortOrders);
+        }
+
+        $obsoleteDamages->delete();
+
+        foreach ($damages as $damageData) {
+            $damageTypeId = $damageTypes->get(
+                $damageData['damage_type']
+            );
+
+            if ($damageTypeId === null) {
+                throw new RuntimeException(
+                    "Tipo di danno {$damageData['damage_type']} non "
+                    . "trovato per l'incantesimo {$spellKey}."
+                );
+            }
+
+            $attackId = null;
+            $attackKey = $damageData['attack_key'] ?? null;
+
+            if ($attackKey !== null) {
+                $attackId = $action->attacks()
+                    ->where('key', $attackKey)
+                    ->firstOrFail()
+                    ->id;
+            }
+
+            $sortOrder = $damageData['sort_order'] ?? 0;
+            $action->damages()->updateOrCreate(
+                ['sort_order' => $sortOrder],
+                [
+                    'creature_stat_block_attack_id' => $attackId,
+                    'damage_type_id' => $damageTypeId,
+                    'dice_count' => $damageData['dice_count'] ?? null,
+                    'die_size' => $damageData['die_size'] ?? null,
+                    'bonus' => $damageData['bonus'] ?? 0,
+                    'average_damage' =>
+                        $damageData['average_damage'] ?? null,
+                    'is_primary' =>
+                        $damageData['is_primary'] ?? false,
+                    'condition' => $damageData['condition'] ?? null,
+                    'notes' => $damageData['notes'] ?? null,
+                ]
+            );
+        }
+    }
+
+    //Sincronizza i tiri salvezza richiesti dalle azioni evocate
+    private function syncSummonedSavingThrows(
+        CreatureStatBlockAction $action,
+        array $savingThrows,
+        Collection $abilities,
+        string $spellKey
+    ): void {
+        $savingThrowKeys = $this->uniqueKeys(
+            $savingThrows,
+            "i tiri salvezza evocati dell'incantesimo {$spellKey}"
+        );
+        $obsoleteSavingThrows = $action->savingThrows();
+
+        if ($savingThrowKeys !== []) {
+            $obsoleteSavingThrows->whereNotIn(
+                'key',
+                $savingThrowKeys
+            );
+        }
+
+        $obsoleteSavingThrows->delete();
+
+        foreach ($savingThrows as $savingThrowData) {
+            $abilityId = $this->resolveAbilityId(
+                $savingThrowData['ability'],
+                $abilities,
+                $spellKey
+            );
+
+            $action->savingThrows()->updateOrCreate(
+                ['key' => $savingThrowData['key']],
+                [
+                    'ability_id' => $abilityId,
+                    'save_dc' => $savingThrowData['save_dc'] ?? null,
+                    'success_type' =>
+                        $savingThrowData['success_type'] ?? 'no_effect',
+                    'failure_description' =>
+                        $savingThrowData['failure_description'] ?? null,
+                    'success_description' =>
+                        $savingThrowData['success_description'] ?? null,
+                    'condition' =>
+                        $savingThrowData['condition'] ?? null,
+                    'sort_order' =>
+                        $savingThrowData['sort_order'] ?? 0,
+                    'notes' => $savingThrowData['notes'] ?? null,
+                ]
+            );
+        }
+    }
+
+    //Sincronizza le progressioni dello stat block evocato
+    private function syncSummonTemplateScalings(
+        SpellSummonTemplateForm $form,
+        array $scalings,
+        CreatureStatBlock $statBlock,
+        Collection $abilities,
+        string $spellKey
+    ): void {
+        $scalingKeys = $this->uniqueKeys(
+            $scalings,
+            "le progressioni evocate dell'incantesimo {$spellKey}"
+        );
+        $obsoleteScalings = $form->scalings();
+
+        if ($scalingKeys !== []) {
+            $obsoleteScalings->whereNotIn('key', $scalingKeys);
+        }
+
+        $obsoleteScalings->delete();
+
+        foreach ($scalings as $scalingData) {
+            $abilityId = $this->resolveAbilityId(
+                $scalingData['source_ability'] ?? null,
+                $abilities,
+                $spellKey
+            );
+            $targetId = $this->resolveSummonScalingTargetId(
+                $statBlock,
+                $scalingData['target_type'],
+                $scalingData['target_ref'] ?? null,
+                $spellKey
+            );
+
+            $form->scalings()->updateOrCreate(
+                ['key' => $scalingData['key']],
+                [
+                    'target_type' => $scalingData['target_type'],
+                    'target_id' => $targetId,
+                    'source_type' => $scalingData['source_type'],
+                    'source_ability_id' => $abilityId,
+                    'operation' => $scalingData['operation'] ?? 'add',
+                    'source_offset' =>
+                        $scalingData['source_offset'] ?? 0,
+                    'multiplier' => $scalingData['multiplier'] ?? 1,
+                    'divisor' => $scalingData['divisor'] ?? 1,
+                    'flat_value' => $scalingData['flat_value'] ?? 0,
+                    'rounding' => $scalingData['rounding'] ?? 'none',
+                    'minimum_source' =>
+                        $scalingData['minimum_source'] ?? null,
+                    'maximum_source' =>
+                        $scalingData['maximum_source'] ?? null,
+                    'minimum_result' =>
+                        $scalingData['minimum_result'] ?? null,
+                    'maximum_result' =>
+                        $scalingData['maximum_result'] ?? null,
+                    'condition' => $scalingData['condition'] ?? null,
+                    'sort_order' => $scalingData['sort_order'] ?? 0,
+                    'notes' => $scalingData['notes'] ?? null,
+                ]
+            );
+        }
+    }
+
+    //Recupera l'elemento dello stat block modificato da una progressione
+    private function resolveSummonScalingTargetId(
+        CreatureStatBlock $statBlock,
+        string $targetType,
+        ?string $targetReference,
+        string $spellKey
+    ): ?int {
+        if ($targetType === 'armor_class') {
+            return $statBlock->defaultArmorClass()->firstOrFail()->id;
+        }
+
+        if ($targetType === 'hit_points') {
+            return $statBlock->hitPoints()->firstOrFail()->id;
+        }
+
+        if ($targetType === 'movement_speed') {
+            $movementTypeId = MovementType::query()
+                ->where('name', $targetReference)
+                ->value('id');
+
+            return $statBlock->movements()
+                ->where('movement_type_id', $movementTypeId)
+                ->firstOrFail()
+                ->id;
+        }
+
+        if ($targetType === 'attack_count') {
+            return $statBlock->actions()
+                ->where('key', $targetReference)
+                ->firstOrFail()
+                ->id;
+        }
+
+        if ($targetType === 'attack_bonus') {
+            [$actionKey, $attackKey] = $this->splitTargetReference(
+                $targetReference,
+                $spellKey
+            );
+
+            return $statBlock->actions()
+                ->where('key', $actionKey)
+                ->firstOrFail()
+                ->attacks()
+                ->where('key', $attackKey)
+                ->firstOrFail()
+                ->id;
+        }
+
+        if (
+            $targetType === 'damage_bonus'
+            || $targetType === 'damage_dice_count'
+        ) {
+            [$actionKey, $sortOrder] = $this->splitTargetReference(
+                $targetReference,
+                $spellKey
+            );
+
+            return $statBlock->actions()
+                ->where('key', $actionKey)
+                ->firstOrFail()
+                ->damages()
+                ->where('sort_order', (int) $sortOrder)
+                ->firstOrFail()
+                ->id;
+        }
+
+        if ($targetType === 'save_dc') {
+            [$actionKey, $savingThrowKey] =
+                $this->splitTargetReference(
+                    $targetReference,
+                    $spellKey
+                );
+
+            return $statBlock->actions()
+                ->where('key', $actionKey)
+                ->firstOrFail()
+                ->savingThrows()
+                ->where('key', $savingThrowKey)
+                ->firstOrFail()
+                ->id;
+        }
+
+        //Le regole speciali possono essere descrittive e non puntare
+        //a una singola riga dello stat block
+        if ($targetType === 'other') {
+            return null;
+        }
+
+        throw new RuntimeException(
+            "Bersaglio {$targetType} non supportato per la "
+            . "progressione dell'incantesimo {$spellKey}."
+        );
+    }
+
+    //Divide un riferimento nel formato azione:elemento
+    private function splitTargetReference(
+        ?string $reference,
+        string $spellKey
+    ): array {
+        if ($reference === null || ! str_contains($reference, ':')) {
+            throw new RuntimeException(
+                "Riferimento di progressione non valido per "
+                . "l'incantesimo {$spellKey}."
+            );
+        }
+
+        return explode(':', $reference, 2);
+    }
+
     //Recupera una caratteristica facoltativa tramite abbreviazione
     private function resolveAbilityId(
         ?string $shortName,
@@ -792,5 +1638,31 @@ abstract class OfficialSpellSeeder extends Seeder
         }
 
         return $keys;
+    }
+
+    //Controlla presenza e unicità dei nomi usati come identità locale
+    private function uniqueNames(array $items, string $context): array
+    {
+        $names = [];
+
+        foreach ($items as $item) {
+            $name = $item['name'] ?? null;
+
+            if (! is_string($name) || trim($name) === '') {
+                throw new RuntimeException(
+                    "Manca un nome valido per {$context}."
+                );
+            }
+
+            $names[] = $name;
+        }
+
+        if (count($names) !== count(array_unique($names))) {
+            throw new RuntimeException(
+                "Sono presenti nomi duplicati per {$context}."
+            );
+        }
+
+        return $names;
     }
 }

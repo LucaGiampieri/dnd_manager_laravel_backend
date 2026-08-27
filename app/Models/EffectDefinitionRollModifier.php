@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use InvalidArgumentException;
 
 class EffectDefinitionRollModifier extends Model
@@ -113,6 +114,22 @@ class EffectDefinitionRollModifier extends Model
                 );
             }
         });
+
+        //Le progressioni polimorfiche non hanno una FK verso il modificatore.
+        static::deleting(function (
+            EffectDefinitionRollModifier $modifier
+        ): void {
+            $modifier->scalings()->delete();
+        });
+    }
+
+    //Relazione polimorfica: formule che crescono con slot o altre sorgenti.
+    public function scalings(): MorphMany
+    {
+        return $this->morphMany(
+            EffectDefinitionScaling::class,
+            'scalable'
+        )->orderBy('sort_order');
     }
 
     //Relazione molti-a-uno (BelongsTo):

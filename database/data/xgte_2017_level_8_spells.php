@@ -70,6 +70,91 @@ return [
                 . 'entro gittata e il suo soffio forma un cono di '
                 . '18,288 metri.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Drago Illusorio',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Crea un enorme drago d’ombra che spaventa i nemici e può emettere coni di energia dannosa mentre viene spostato dall’incantatore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_acid',
+                        'damage_type' => 'Acido',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 7,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio per il soffio. TS Intelligenza riuscito: metà; chi riconosce l’illusione ha vantaggio al tiro. Tipo: Acido.',
+                    ],
+                    [
+                        'key' => 'damage_cold',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => false,
+                        'sort_order' => 2,
+                        'dice_count' => 7,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio per il soffio. TS Intelligenza riuscito: metà; chi riconosce l’illusione ha vantaggio al tiro. Tipo: Freddo.',
+                    ],
+                    [
+                        'key' => 'damage_fire',
+                        'damage_type' => 'Fuoco',
+                        'is_primary' => false,
+                        'sort_order' => 3,
+                        'dice_count' => 7,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio per il soffio. TS Intelligenza riuscito: metà; chi riconosce l’illusione ha vantaggio al tiro. Tipo: Fuoco.',
+                    ],
+                    [
+                        'key' => 'damage_lightning',
+                        'damage_type' => 'Fulmine',
+                        'is_primary' => false,
+                        'sort_order' => 4,
+                        'dice_count' => 7,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio per il soffio. TS Intelligenza riuscito: metà; chi riconosce l’illusione ha vantaggio al tiro. Tipo: Fulmine.',
+                    ],
+                    [
+                        'key' => 'damage_necrotic',
+                        'damage_type' => 'Necrotico',
+                        'is_primary' => false,
+                        'sort_order' => 5,
+                        'dice_count' => 7,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio per il soffio. TS Intelligenza riuscito: metà; chi riconosce l’illusione ha vantaggio al tiro. Tipo: Necrotico.',
+                    ],
+                    [
+                        'key' => 'damage_poison',
+                        'damage_type' => 'Veleno',
+                        'is_primary' => false,
+                        'sort_order' => 6,
+                        'dice_count' => 7,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio per il soffio. TS Intelligenza riuscito: metà; chi riconosce l’illusione ha vantaggio al tiro. Tipo: Veleno.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -97,6 +182,27 @@ return [
             'area_size_meters' => 36.576,
             'requires_sight' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Fortezza Possente',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Fa emergere dal terreno una fortezza in pietra completa di torrette, mura, rocca, arredi, cibo e servitori invisibili.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -119,6 +225,39 @@ return [
             'area_shape' => 'cube',
             'area_size_meters' => 9.144,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Orrido Avvizzimento di Abi-Dalzim',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Estrae l’umidità dalle creature in un grande cubo, infliggendo ingenti danni necrotici e facendo avvizzire i vegetali non magici.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_necrotic',
+                        'damage_type' => 'Necrotico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 12,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -144,6 +283,42 @@ return [
             'target_type' => 'area',
             'area_shape' => 'sphere',
             'area_size_meters' => 18.288,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Oscurità della Follia',
+                'application_type' => 'on_start_turn',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Riempie una vasta sfera di oscurità magica impenetrabile, voci folli e risate che infliggono danni psichici alle creature al suo interno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_psychic',
+                        'damage_type' => 'Psichico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 8,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+                'condition' => 'Una creatura che inizia il turno nell’area effettua un TS Saggezza, metà del danno se riesce.',
+            ],
         ],
     ]),
 ];

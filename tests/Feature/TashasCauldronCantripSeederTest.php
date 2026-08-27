@@ -55,7 +55,11 @@ it('salva tutti i trucchetti del Calderone di Tasha', function () {
         ->toBe('emanation')
         ->and($swordBurst->targetProfile->area_size_meters)
         ->toBe(1.524)
-        ->and(SpellMaterialComponent::query()->count())
+        ->and(
+            SpellMaterialComponent::query()
+                ->whereIn('spell_id', (clone $spells)->pluck('id'))
+                ->count()
+        )
         ->toBe(2);
 
     $weapon = $boomingBlade->materialComponents()->firstOrFail();
@@ -189,6 +193,20 @@ it('salva gli effetti strutturati dei trucchetti di Tasha', function () {
         ->damages()
         ->firstOrFail();
 
+    $cantripIds = Spell::query()
+        ->where('version_key', 'tcoe_2020')
+        ->where('level', 0)
+        ->pluck('id');
+
+    $cantripEffectIds = EffectDefinition::query()
+        ->where('source_type', Spell::class)
+        ->whereIn('source_id', $cantripIds)
+        ->pluck('id');
+
+    $cantripDamageIds = EffectDefinitionDamage::query()
+        ->whereIn('effect_definition_id', $cantripEffectIds)
+        ->pluck('id');
+
     expect($forceDamage->damageType->name)
         ->toBe('Forza')
         ->and(
@@ -203,17 +221,37 @@ it('salva gli effetti strutturati dei trucchetti di Tasha', function () {
         ->toBe(6)
         ->and($forceDamage->scalings()->count())
         ->toBe(3)
-        ->and(EffectDefinition::query()->count())
+        ->and($cantripEffectIds->count())
         ->toBe(8)
-        ->and(EffectDefinitionDamage::query()->count())
+        ->and($cantripDamageIds->count())
         ->toBe(8)
-        ->and(EffectDefinitionScaling::query()->count())
+        ->and(
+            EffectDefinitionScaling::query()
+                ->where(
+                    'scalable_type',
+                    EffectDefinitionDamage::class
+                )
+                ->whereIn('scalable_id', $cantripDamageIds)
+                ->count()
+        )
         ->toBe(18)
-        ->and(EffectDefinitionRollModifier::query()->count())
+        ->and(
+            EffectDefinitionRollModifier::query()
+                ->whereIn('effect_definition_id', $cantripEffectIds)
+                ->count()
+        )
         ->toBe(1)
-        ->and(EffectDefinitionForcedMovement::query()->count())
+        ->and(
+            EffectDefinitionForcedMovement::query()
+                ->whereIn('effect_definition_id', $cantripEffectIds)
+                ->count()
+        )
         ->toBe(1)
-        ->and(EffectDefinitionDuration::query()->count())
+        ->and(
+            EffectDefinitionDuration::query()
+                ->whereIn('effect_definition_id', $cantripEffectIds)
+                ->count()
+        )
         ->toBe(2);
 });
 

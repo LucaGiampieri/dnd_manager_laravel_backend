@@ -68,6 +68,56 @@ return [
             'target_count' => 1,
             'requires_sight' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Aculeo Mentale',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Penetra nella mente di una creatura visibile, infligge danni psichici e, se il tiro fallisce, permette di seguirne la posizione.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_psychic',
+                        'damage_type' => 'Psichico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 3,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -98,6 +148,72 @@ return [
             'notes' => 'Il vortice influenza le creature che terminano '
                 . 'il turno entro 1,524 metri da esso.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Diavoletto di Polvere',
+                'application_type' => 'on_end_turn',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Evoca un piccolo vortice mobile che danneggia e spinge le creature vicine e può sollevare una nube di detriti.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_bludgeoning',
+                        'damage_type' => 'Contundente',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+                'condition' => 'Creatura che termina il turno entro 1,5 metri dal vortice: TS Forza, metà del danno e nessuna spinta se riesce.',
+                'forced_movements' => [
+                    [
+                        'key' => 'movement_1',
+                        'movement_type' => 'push',
+                        'origin_type' => 'area_center',
+                        'direction_type' => 'away_from_origin',
+                        'distance' => 3,
+                        'up_to_distance' => false,
+                        'straight_line' => true,
+                        'stops_at_obstacle' => true,
+                        'opportunity_attack_rule' => 'does_not_provoke',
+                        'sort_order' => 1,
+                        'condition' => 'Solo TS Forza fallito a fine turno; allontanamento dal vortice, non dall’incantatore.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -124,6 +240,85 @@ return [
             'notes' => 'La lama può essere lanciata e fatta ricomparire '
                 . 'nella mano con un’azione bonus.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Lama d’Ombra',
+                'application_type' => 'automatic',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Crea nella mano dell’incantatore una spada magica di ombra solida che infligge danni psichici ed è più efficace nella luce fioca o nell’oscurità.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_psychic',
+                        'damage_type' => 'Psichico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 2,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'modifier_source_type' => 'source_ability_modifier',
+                        'notes' => 'È un’arma con proprietà accurata: al danno si aggiunge Forza o Destrezza del suo utilizzatore.',
+                        'scalings' => [
+                            [
+                                'key' => 'spell_slot_level_3_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'set',
+                                'minimum_source' => 3,
+                                'maximum_source' => 4,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'spell_slot_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 6,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'spell_slot_level_7_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'set',
+                                'minimum_source' => 7,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 5,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'advantage',
+                        'sort_order' => 1,
+                        'condition' => 'Solo attacchi con la lama contro un bersaglio in luce fioca o oscurità.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -146,6 +341,27 @@ return [
             'notes' => 'Bersaglia una fiamma in un cubo di 1,524 metri; '
                 . 'crea un lampo entro 3,048 metri oppure fumo in una '
                 . 'sfera del raggio di 6,096 metri.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Pirotecnica',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Estingue una fiamma non magica visibile per generare fuochi d’artificio accecanti oppure una nube di fumo oscurante.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -172,6 +388,54 @@ return [
             'area_shape' => 'sphere',
             'area_size_meters' => 1.524,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Sciame di Palle di Neve di Snilloc',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Fa esplodere una raffica di palle di neve magiche in un punto entro gittata, infliggendo danni da freddo alle creature vicine.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_cold',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 3,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -193,6 +457,29 @@ return [
             'target_type' => 'special',
             'requires_sight' => true,
             'notes' => 'Bersaglia una parte visibile del cielo.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Scritta Celeste',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Forma nel cielo fino a dieci parole composte da nuvole, visibili finché l’incantesimo permane o un vento forte le disperde.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -224,6 +511,156 @@ return [
             'notes' => 'La creatura toccata può produrre un cono di '
                 . '4,572 metri usando la propria azione.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Soffio del Drago',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Conferisce a una creatura consenziente la capacità di esalare ripetutamente un cono di energia elementale scelto dall’incantatore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_acid',
+                        'damage_type' => 'Acido',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 3,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio. Il beneficiario usa un’azione per esalare; TS Destrezza riuscito: metà. Tipo: Acido.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key' => 'damage_cold',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => false,
+                        'sort_order' => 2,
+                        'dice_count' => 3,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio. Il beneficiario usa un’azione per esalare; TS Destrezza riuscito: metà. Tipo: Freddo.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key' => 'damage_fire',
+                        'damage_type' => 'Fuoco',
+                        'is_primary' => false,
+                        'sort_order' => 3,
+                        'dice_count' => 3,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio. Il beneficiario usa un’azione per esalare; TS Destrezza riuscito: metà. Tipo: Fuoco.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key' => 'damage_lightning',
+                        'damage_type' => 'Fulmine',
+                        'is_primary' => false,
+                        'sort_order' => 4,
+                        'dice_count' => 3,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio. Il beneficiario usa un’azione per esalare; TS Destrezza riuscito: metà. Tipo: Fulmine.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'key' => 'damage_poison',
+                        'damage_type' => 'Veleno',
+                        'is_primary' => false,
+                        'sort_order' => 5,
+                        'dice_count' => 3,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio. Il beneficiario usa un’azione per esalare; TS Destrezza riuscito: metà. Tipo: Veleno.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -248,6 +685,68 @@ return [
             'requires_sight' => true,
             'notes' => 'Lo spirito non può curare costrutti o non morti '
                 . 'e può essere mosso di 9,144 metri.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Spirito Guaritore',
+                'application_type' => 'automatic',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Evoca uno spirito naturale mobile che cura le creature quando entrano nel suo spazio o vi iniziano il turno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'healings' => [
+                    [
+                        'key' => 'healing',
+                        'healing_type' => 'hit_points',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'condition' => 'Prima entrata nello spazio dello spirito in un turno o inizio del turno al suo interno, se l’incantatore sceglie di curare. Esclusi costrutti e non morti.',
+                    ],
+                ],
+                'notes' => 'Errata ufficiale 2020: massimo di cure pari a 1 + modificatore della caratteristica da incantatore, minimo 2; poi lo spirito scompare.',
+                'scalings' => [
+                    [
+                        'key' => 'maximum_healing_uses',
+                        'target_field' => 'healing_uses',
+                        'source_type' => 'other',
+                        'operation' => 'set',
+                        'flat_value' => 1,
+                        'minimum_result' => 2,
+                        'notes' => 'Input: modificatore della caratteristica da incantatore. Errata 2020: 1 + modificatore, minimo 2 cure complessive.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -280,6 +779,41 @@ return [
                 . 'i successivi tiri contro lo stritolamento dimezzano '
                 . 'il danno quando superati.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Stretta della Terra di Maximilian',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Fa emergere dal terreno una mano di terra compatta che afferra, trattiene e può stritolare una creatura vicina.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_bludgeoning',
+                        'damage_type' => 'Contundente',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 2,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                    ],
+                ],
+                'condition' => 'Alla presa iniziale: TS Forza, nessun danno se riesce. Poi, usando un’azione per stritolare la creatura già trattenuta: nuovo TS Forza, metà danno se riesce.',
+            ],
+        ],
     ]),
 
     $spell([
@@ -306,6 +840,54 @@ return [
             'area_secondary_size_meters' => 1.524,
             'notes' => 'La linea ha origine dall’incantatore.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Vampa di Aganazzar',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Proietta dall’incantatore una linea di fiamme rombanti che infligge danni da fuoco alle creature attraversate.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_fire',
+                        'damage_type' => 'Fuoco',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 3,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 3,
+                                'source_offset' => -2,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -329,6 +911,37 @@ return [
             'notes' => 'L’emanazione resta centrata sull’incantatore '
                 . 'e si muove insieme a lui.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Vento di Interdizione',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Genera un forte vento attorno all’incantatore che assorda, estingue piccole fiamme, ostacola il movimento e gli attacchi a distanza.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'disadvantage',
+                        'sort_order' => 1,
+                        'condition' => 'Solo attacchi con arma a distanza che entrano o escono dal vento.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -350,6 +963,45 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Vincolo della Terra',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Avvolge una creatura visibile con energia magica e, se fallisce il tiro salvezza, annulla la sua velocità di volare facendola scendere gradualmente.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'forced_movements' => [
+                    [
+                        'key' => 'movement_1',
+                        'movement_type' => 'move',
+                        'origin_type' => 'source',
+                        'direction_type' => 'special',
+                        'distance' => 18,
+                        'up_to_distance' => false,
+                        'straight_line' => true,
+                        'stops_at_obstacle' => true,
+                        'opportunity_attack_rule' => 'does_not_provoke',
+                        'sort_order' => 1,
+                        'condition' => 'Solo creatura volante che ha fallito il TS iniziale: discesa sicura di 18 metri per round finché arriva a terra.',
+                        'notes' => 'Non è una caduta; annulla la velocità di volare per la durata.',
+                    ],
+                ],
+            ],
         ],
     ]),
 ];

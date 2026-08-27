@@ -59,6 +59,15 @@ class EffectDefinition extends Model
                     $healing->delete();
                 });
 
+            //Attiva la pulizia delle progressioni anche per i modificatori.
+            $effect->rollModifiers()
+                ->get()
+                ->each(function (
+                    EffectDefinitionRollModifier $modifier
+                ): void {
+                    $modifier->delete();
+                });
+
             $effect->scalings()->delete();
         });
     }

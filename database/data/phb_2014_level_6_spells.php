@@ -62,6 +62,29 @@ return [
             'requires_sight' => true,
             'notes' => 'Crea due portali del diametro di 3,048 metri: uno entro 3,048 metri dall’incantatore e l’altro entro la gittata.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Portale Arcano',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Crea due portali circolari collegati che permettono di attraversare istantaneamente la distanza tra due punti visibili.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -86,6 +109,42 @@ return [
             'requires_sight' => true,
             'notes' => 'Può essere una parete lunga fino a 30,48 metri o un anello con diametro massimo di 18,288 metri; è alta 6,096 metri e spessa 1,524 metri.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Barriera di Lame',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Erige una parete di lame rotanti che concede copertura, ostacola il passaggio e infligge 6d10 danni taglienti.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_slashing',
+                        'damage_type' => 'Tagliente',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 6,
+                        'die_size' => 10,
+                        'flat_bonus' => 0,
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+                'condition' => 'Prima entrata nella parete nel turno oppure inizio del turno al suo interno: TS Destrezza, metà se riesce.',
+            ],
+        ],
     ]),
 
     $spell([
@@ -109,6 +168,62 @@ return [
             'requires_sight' => true,
             'notes' => 'I tre bersagli secondari devono trovarsi entro 9,144 metri dal primo e ogni bersaglio può essere colpito una sola volta.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Catena di Fulmini',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Un fulmine colpisce un primo bersaglio e si dirama verso altri tre bersagli vicini, infliggendo 10d8 danni da fulmine.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_lightning',
+                        'damage_type' => 'Fulmine',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 10,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+                'scalings' => [
+                    [
+                        'key' => 'base_target_count',
+                        'target_field' => 'target_count',
+                        'source_type' => 'fixed',
+                        'fixed_value' => 4,
+                        'operation' => 'set',
+                        'sort_order' => 0,
+                    ],
+                    [
+                        'key' => 'higher_slot_target_count',
+                        'target_field' => 'target_count',
+                        'source_type' => 'spell_slot_level',
+                        'operation' => 'add',
+                        'minimum_source' => 7,
+                        'source_offset' => -6,
+                        'multiplier' => 1,
+                        'divisor' => 1,
+                        'rounding' => 'none',
+                        'sort_order' => 1,
+                        'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -131,6 +246,54 @@ return [
             'area_shape' => 'sphere',
             'area_size_meters' => 18.288,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Cerchio di Morte',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Una vasta sfera di energia necromantica infligge 8d6 danni necrotici alle creature al suo interno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_necrotic',
+                        'damage_type' => 'Necrotico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 8,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 2,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -151,6 +314,29 @@ return [
             'target_type' => 'point',
             'target_count' => 1,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Evoca Folletto',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Evoca una creatura fatata o una bestia in forma di spirito fatato di grado di sfida non superiore a 6.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -173,6 +359,29 @@ return [
         'target' => [
             'target_type' => 'self',
             'can_target_self' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Contingenza',
+                'application_type' => 'special',
+                'target_scope' => 'source',
+                'ends_with_source' => true,
+                'description' => 'Associa un incantesimo di 5° livello o inferiore a una condizione, facendolo attivare automaticamente sull’incantatore quando essa si verifica.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'day',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -227,6 +436,27 @@ return [
             'can_target_objects' => true,
             'notes' => 'Può essere lanciato soltanto di notte e interessa cadaveri di umanoidi Medi o Piccoli.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Creare Non Morti',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Animando fino a tre cadaveri umanoidi durante la notte, crea ghoul che obbediscono all’incantatore per 24 ore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -249,6 +479,53 @@ return [
             'can_target_objects' => true,
             'requires_sight' => true,
             'notes' => 'Può colpire una creatura, un oggetto non magico o una creazione di forza magica.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Disintegrazione',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Un raggio verde infligge 10d6 + 40 danni da forza e riduce in polvere una creatura uccisa o una porzione di materia non magica.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_force',
+                        'damage_type' => 'Forza',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 10,
+                        'die_size' => 6,
+                        'flat_bonus' => 40,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 3,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -273,6 +550,27 @@ return [
             'can_target_objects' => true,
             'notes' => 'L’oggetto non può pesare più di 4,536 chilogrammi e non può superare 1,829 metri nella sua dimensione maggiore.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Evocazione Istantanea di Drawmij',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Lega magicamente un piccolo oggetto a uno zaffiro, che può essere frantumato in seguito per richiamare l’oggetto o localizzarne il possessore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'until_source_ends',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -294,6 +592,29 @@ return [
             'can_target_self' => true,
             'requires_sight' => true,
             'notes' => 'Durante la durata può influenzare una creatura visibile entro 18,288 metri a ogni turno.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Sguardo Penetrante',
+                'application_type' => 'special',
+                'target_scope' => 'source',
+                'ends_with_source' => true,
+                'description' => 'Rende lo sguardo dell’incantatore capace di addormentare, terrorizzare o debilitare una creatura diversa a ogni turno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -336,6 +657,29 @@ return [
             'target_type' => 'self',
             'can_target_self' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Scopri il Percorso',
+                'application_type' => 'special',
+                'target_scope' => 'source',
+                'ends_with_source' => true,
+                'description' => 'Indica la via fisica più breve e diretta verso un luogo fisso sullo stesso piano che l’incantatore conosce.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 24,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -358,6 +702,29 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Carne in Pietra',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Indurisce progressivamente una creatura fino a pietrificarla se accumula abbastanza fallimenti nei tiri salvezza.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -409,6 +776,51 @@ return [
             'area_shape' => 'special',
             'notes' => 'Protegge fino a 3.716,122 metri quadrati di pavimento e fino a 9,144 metri sopra di esso.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Proibizione',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Protegge una vasta area dal viaggio planare e dal teletrasporto, danneggiando i tipi di creature soprannaturali scelti.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 24,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_radiant',
+                        'damage_type' => 'Radioso',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 5,
+                        'die_size' => 10,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio; solo creature dei tipi designati, alla prima entrata nel turno o all’inizio del turno. Nessun tiro salvezza. Tipo: Radioso.',
+                    ],
+                    [
+                        'key' => 'damage_necrotic',
+                        'damage_type' => 'Necrotico',
+                        'is_primary' => false,
+                        'sort_order' => 2,
+                        'dice_count' => 5,
+                        'die_size' => 10,
+                        'flat_bonus' => 0,
+                        'condition' => 'Solo il tipo scelto al lancio; solo creature dei tipi designati, alla prima entrata nel turno o all’inizio del turno. Nessun tiro salvezza. Tipo: Necrotico.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -433,6 +845,29 @@ return [
             'area_size_meters' => 3.048,
             'can_target_self' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Globo di Invulnerabilità',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Forma una barriera immobile che esclude gli effetti degli incantesimi di 5° livello o inferiore lanciati dall’esterno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -456,6 +891,29 @@ return [
             'area_shape' => 'special',
             'notes' => 'Protegge fino a 232,258 metri quadrati di pavimento, distribuibili su più piani secondo i limiti dell’incantesimo.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Vigilanza e Interdizione',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Protegge una fortezza con nebbia, porte bloccate, ragnatele, confusione e altri effetti magici configurabili.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 24,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -474,6 +932,39 @@ return [
             'target_count' => 1,
             'requires_sight' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Ferire',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Infligge 14d6 danni necrotici e riduce temporaneamente i punti ferita massimi del bersaglio della stessa quantità.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_necrotic',
+                        'damage_type' => 'Necrotico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 14,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'notes' => 'TS Costituzione riuscito: metà. Il danno non può ridurre il bersaglio sotto 1 PF. Solo dopo un fallimento, i PF massimi sono ridotti dello stesso ammontare per 1 ora; rimuovere la malattia termina prima la riduzione.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -490,6 +981,51 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Guarigione',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Ripristina 70 punti ferita e rimuove cecità, sordità e malattie da una creatura.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'healings' => [
+                    [
+                        'key' => 'healing',
+                        'healing_type' => 'hit_points',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'flat_bonus' => 70.0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_flat_bonus',
+                                'target_field' => 'flat_bonus',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 10,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -511,6 +1047,39 @@ return [
         'target' => [
             'target_type' => 'creatures',
             'target_count' => 12,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Banchetto degli Eroi',
+                'application_type' => 'special',
+                'target_scope' => 'targets',
+                'ends_with_source' => true,
+                'description' => 'Crea un banchetto per dodici creature che cura malattie e veleni e concede potenti benefici difensivi per 24 ore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'healings' => [
+                    [
+                        'key' => 'healing',
+                        'healing_type' => 'other',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 2,
+                        'die_size' => 10,
+                        'flat_bonus' => 0,
+                        'notes' => 'Lo stesso risultato aumenta i PF attuali e i PF massimi di ogni partecipante per 24 ore; non sono PF temporanei.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -536,6 +1105,27 @@ return [
             'requires_sight' => true,
             'notes' => 'Dal contenitore può tentare di possedere un umanoide visibile entro 30,48 metri.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Giara Magica',
+                'application_type' => 'special',
+                'target_scope' => 'source',
+                'ends_with_source' => true,
+                'description' => 'Trasferisce l’anima dell’incantatore in un contenitore e permette di tentare di possedere il corpo di un umanoide vicino.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'until_source_ends',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -559,6 +1149,29 @@ return [
             'requires_sight' => true,
             'notes' => 'Ogni bersaglio deve poter udire e comprendere l’incantatore.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Suggestione di Massa',
+                'application_type' => 'special',
+                'target_scope' => 'targets',
+                'ends_with_source' => true,
+                'description' => 'Influenza fino a dodici creature con una richiesta ragionevole che esse cercano di eseguire per la durata.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 24,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -580,6 +1193,29 @@ return [
             'area_shape' => 'square',
             'area_size_meters' => 12.192,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Muovere il Terreno',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Rimodella lentamente terra, sabbia o argilla in una zona quadrata, creando rilievi, fossati o variazioni del terreno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 2,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -603,6 +1239,54 @@ return [
             'area_size_meters' => 18.288,
         ],
         'notes' => 'L’incantatore può trattenere il globo per un minuto e affidarlo a una creatura perché lo lanci successivamente.',
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Sfera Congelante di Otiluke',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Lancia un globo gelido che esplode in una vasta sfera, infliggendo 10d6 danni da freddo e congelando l’acqua.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_cold',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 10,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -623,6 +1307,49 @@ return [
             'target_count' => 1,
             'requires_sight' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Danza Irresistibile di Otto',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Costringe una creatura visibile a ballare, limitandone il movimento e rendendola vulnerabile finché non usa un’azione per liberarsi.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'disadvantage',
+                        'sort_order' => 1,
+                        'condition' => 'Attacchi effettuati dalla creatura danzante.',
+                    ],
+                    [
+                        'roll_type' => 'saving_throw',
+                        'modifier_type' => 'disadvantage',
+                        'sort_order' => 2,
+                        'ability' => 'DES',
+                    ],
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'advantage',
+                        'sort_order' => 3,
+                        'condition' => 'Attacchi di altre creature contro la creatura danzante.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -639,6 +1366,27 @@ return [
         'target' => [
             'target_type' => 'point',
             'target_count' => 1,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Alleato Planare',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Chiede a un’entità ultraterrena di inviare un celestiale, elementale o folletto, con il quale negoziare un servizio.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -660,6 +1408,27 @@ return [
             'area_shape' => 'cube',
             'area_size_meters' => 9.144,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Illusione Programmata',
+                'application_type' => 'special',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Crea un’illusione visiva e sonora che si manifesta quando si verifica una condizione stabilita e poi rimane inattiva per un periodo.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'until_source_ends',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -686,6 +1455,42 @@ return [
             'area_secondary_size_meters' => 1.524,
             'can_target_self' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Bagliore Solare',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Proietta ripetutamente una linea di luce solare che infligge 6d8 danni radiosi e può accecare le creature colpite.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_radiant',
+                        'damage_type' => 'Radioso',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 6,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                ],
+                'condition' => 'Al lancio e con un’azione nei turni successivi: TS Costituzione, metà del danno se riesce. Non morti e melme hanno svantaggio al tiro; l’accecamento dura fino al turno successivo dell’incantatore.',
+            ],
+        ],
     ]),
 
     $spell([
@@ -703,6 +1508,29 @@ return [
             'target_type' => 'object',
             'target_count' => 1,
             'can_target_objects' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Trasporto Vegetale',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Trasforma una pianta di taglia Grande o superiore in un passaggio temporaneo verso un’altra pianta conosciuta sullo stesso piano.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'round',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -724,6 +1552,29 @@ return [
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Visione del Vero',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Conferisce vista pura entro 36,576 metri, permettendo di vedere invisibilità, illusioni, mutaforma e Piano Etereo nella loro vera natura.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -752,6 +1603,81 @@ return [
             'requires_sight' => true,
             'notes' => 'Può formare dieci pannelli da 3,048 metri per lato oppure una cupola emisferica con raggio massimo di 3,048 metri.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Muro di Ghiaccio',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Crea pannelli o una cupola di ghiaccio che infliggono danni da freddo alla comparsa e lasciano aria gelida quando vengono distrutti.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_cold',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 10,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 2,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                    ],
+                    [
+                        'key' => 'frigid_air',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => false,
+                        'sort_order' => 2,
+                        'dice_count' => 5,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'condition' => 'Prima entrata nel turno nell’aria gelida lasciata da una sezione distrutta: TS Costituzione, metà se riesce.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -779,6 +1705,82 @@ return [
             'requires_sight' => true,
             'notes' => 'Può essere una parete lunga 18,288 metri oppure un cilindro del diametro di 6,096 metri; è alta 3,048 metri e spessa 1,524 metri.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Muro di Spine',
+                'application_type' => 'failed_save',
+                'target_scope' => 'area',
+                'ends_with_source' => true,
+                'description' => 'Fa sorgere una barriera di rovi che blocca la visuale, rallenta fortemente il passaggio e infligge 7d8 danni perforanti.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_piercing',
+                        'damage_type' => 'Perforante',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 7,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                        'notes' => 'Tiro salvezza riuscito: metà dei danni, arrotondata per difetto; la formula indica il danno pieno.',
+                        'condition' => 'Solo quando compare il muro: TS Destrezza, metà se riesce.',
+                    ],
+                    [
+                        'key' => 'moving_through',
+                        'damage_type' => 'Tagliente',
+                        'is_primary' => false,
+                        'sort_order' => 2,
+                        'dice_count' => 7,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'condition' => 'Prima entrata nel muro nel turno o fine del turno al suo interno: TS Destrezza, metà se riesce.',
+                        'scalings' => [
+                            [
+                                'key' => 'higher_slot_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'spell_slot_level',
+                                'operation' => 'add',
+                                'minimum_source' => 7,
+                                'source_offset' => -6,
+                                'multiplier' => 1,
+                                'divisor' => 1,
+                                'rounding' => 'none',
+                                'sort_order' => 1,
+                                'notes' => 'Incremento rispetto al valore base, non incremento rispetto allo slot precedente.',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -801,6 +1803,29 @@ return [
             'can_target_self' => true,
             'requires_sight' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Camminare nel Vento',
+                'application_type' => 'special',
+                'target_scope' => 'targets',
+                'ends_with_source' => true,
+                'description' => 'Trasforma l’incantatore e fino a dieci creature consenzienti in nubi velocissime capaci di volare per lunghe distanze.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 8,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     $spell([
@@ -816,6 +1841,27 @@ return [
             'target_count' => 6,
             'can_target_self' => true,
             'notes' => 'Le altre cinque creature devono trovarsi entro 1,524 metri dall’incantatore.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Parola del Ritiro',
+                'application_type' => 'special',
+                'target_scope' => 'targets',
+                'ends_with_source' => true,
+                'description' => 'Teletrasporta l’incantatore e fino a cinque creature consenzienti in un santuario precedentemente designato e legato alla sua divinità.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 ];

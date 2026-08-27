@@ -45,6 +45,73 @@ return [
             'requires_sight' => true,
             'notes' => 'Il secondo bersaglio deve trovarsi entro 1,5 metri dal primo.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Spruzzo Acido',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Scaglia una bolla acida contro una o due creature vicine tra loro. Un bersaglio che fallisce il tiro salvezza subisce 1d6 danni da acido.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_acid',
+                        'damage_type' => 'Acido',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -62,6 +129,29 @@ return [
             'target_type' => 'self',
             'target_count' => 1,
             'can_target_self' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Interdizione alle Lame',
+                'application_type' => 'special',
+                'target_scope' => 'source',
+                'ends_with_source' => true,
+                'description' => 'L’incantatore ottiene temporaneamente resistenza ai danni contundenti, perforanti e taglienti inflitti dagli attacchi con arma.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'round',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -81,6 +171,83 @@ return [
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Tocco Gelido',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Una mano spettrale colpisce una creatura, infligge 1d8 danni necrotici e le impedisce temporaneamente di recuperare punti ferita.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'round',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_necrotic',
+                        'damage_type' => 'Necrotico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'disadvantage',
+                        'sort_order' => 1,
+                        'condition' => 'Solo se il bersaglio è un non morto: i suoi attacchi contro l’incantatore fino alla fine del turno successivo dell’incantatore.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -103,6 +270,29 @@ return [
             'target_count' => 4,
             'notes' => 'Le luci possono essere spostate dall’incantatore.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Luci Danzanti',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Crea fino a quattro luci mobili che possono apparire come torce, lanterne o una forma luminosa vagamente umanoide.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -116,6 +306,27 @@ return [
         'description' => 'Produce un piccolo effetto naturale, come prevedere il tempo, far sbocciare una pianta o creare un innocuo fenomeno sensoriale.',
         'target' => [
             'target_type' => 'special',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Artificio Druidico',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Produce un piccolo effetto naturale, come prevedere il tempo, far sbocciare una pianta o creare un innocuo fenomeno sensoriale.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -134,6 +345,84 @@ return [
             'target_type' => 'creatures',
             'target_count' => 1,
             'notes' => 'Il numero massimo di bersagli aumenta insieme al numero dei raggi.',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Deflagrazione Occulta',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Ogni raggio richiede un tiro per colpire distinto e infligge 1d10 danni da forza. I raggi possono colpire bersagli diversi.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_force',
+                        'damage_type' => 'Forza',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 10,
+                        'flat_bonus' => 0,
+                    ],
+                ],
+                'scalings' => [
+                    [
+                        'key' => 'character_level_1_beam_count',
+                        'target_field' => 'beam_count',
+                        'source_type' => 'character_level',
+                        'operation' => 'set',
+                        'minimum_source' => 1,
+                        'maximum_source' => 4,
+                        'multiplier' => 0,
+                        'flat_value' => 1,
+                        'sort_order' => 1,
+                    ],
+                    [
+                        'key' => 'character_level_5_beam_count',
+                        'target_field' => 'beam_count',
+                        'source_type' => 'character_level',
+                        'operation' => 'set',
+                        'minimum_source' => 5,
+                        'maximum_source' => 10,
+                        'multiplier' => 0,
+                        'flat_value' => 2,
+                        'sort_order' => 2,
+                    ],
+                    [
+                        'key' => 'character_level_11_beam_count',
+                        'target_field' => 'beam_count',
+                        'source_type' => 'character_level',
+                        'operation' => 'set',
+                        'minimum_source' => 11,
+                        'maximum_source' => 16,
+                        'multiplier' => 0,
+                        'flat_value' => 3,
+                        'sort_order' => 3,
+                    ],
+                    [
+                        'key' => 'character_level_17_beam_count',
+                        'target_field' => 'beam_count',
+                        'source_type' => 'character_level',
+                        'operation' => 'set',
+                        'minimum_source' => 17,
+                        'maximum_source' => null,
+                        'multiplier' => 0,
+                        'flat_value' => 4,
+                        'sort_order' => 4,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -154,6 +443,73 @@ return [
             'can_target_objects' => true,
             'notes' => 'Può colpire una creatura oppure un oggetto.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Dardo di Fuoco',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Scaglia una particella infuocata che infligge 1d10 danni da fuoco e può incendiare un oggetto infiammabile non indossato.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_fire',
+                        'damage_type' => 'Fuoco',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 10,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -172,6 +528,38 @@ return [
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Amicizia',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Conferisce vantaggio alle prove di Carisma rivolte a una creatura non ostile. Al termine, la creatura comprende di essere stata influenzata magicamente.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'ability_check',
+                        'modifier_type' => 'advantage',
+                        'sort_order' => 1,
+                        'ability' => 'CAR',
+                        'condition' => 'Prove di Carisma rivolte alla creatura non ostile scelta al lancio.',
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -192,6 +580,39 @@ return [
             'target_count' => 1,
             'can_target_self' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Guida',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Il bersaglio può aggiungere 1d4 a una prova di caratteristica effettuata prima della fine dell’incantesimo.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'ability_check',
+                        'modifier_type' => 'bonus',
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 4,
+                        'condition' => 'Una sola prova scelta dal beneficiario, prima o dopo il tiro; poi l’incantesimo termina.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -211,6 +632,29 @@ return [
             'target_count' => 1,
             'can_target_objects' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Luce',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Fa risplendere un oggetto, producendo luce intensa e luce fioca nell’area circostante.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -226,6 +670,29 @@ return [
         'description' => 'Crea una mano spettrale che può manipolare oggetti, aprire contenitori e trasportare un peso limitato.',
         'target' => [
             'target_type' => 'point',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Mano Magica',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Crea una mano spettrale che può manipolare oggetti, aprire contenitori e trasportare un peso limitato.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -245,6 +712,27 @@ return [
             'target_type' => 'object',
             'target_count' => 1,
             'can_target_objects' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Riparare',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Ripara una singola rottura o lacerazione di dimensioni limitate in un oggetto toccato.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -266,6 +754,29 @@ return [
             'target_count' => 1,
             'notes' => 'Alcuni materiali e il silenzio magico possono bloccare il messaggio.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Messaggio',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Invia un breve messaggio sussurrato a una creatura, che può rispondere con un altro sussurro.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'round',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -282,6 +793,29 @@ return [
         'description' => 'Crea un suono oppure l’immagine immobile di un piccolo oggetto. L’interazione può rivelarne la natura illusoria.',
         'target' => [
             'target_type' => 'point',
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Illusione Minore',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Crea un suono oppure l’immagine immobile di un piccolo oggetto. L’interazione può rivelarne la natura illusoria.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -301,6 +835,73 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Spruzzo Velenoso',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Proietta una nube tossica contro una creatura. Se fallisce il tiro salvezza, il bersaglio subisce 1d12 danni da veleno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_poison',
+                        'damage_type' => 'Veleno',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 12,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -317,6 +918,29 @@ return [
         'target' => [
             'target_type' => 'special',
             'can_target_objects' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Prestidigitazione',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Produce piccoli trucchi magici innocui, come pulire, sporcare, scaldare, raffreddare o creare effetti sensoriali.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'hour',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -339,6 +963,75 @@ return [
             'can_target_self' => true,
             'notes' => 'La fiamma può essere mantenuta oppure scagliata.',
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Produrre Fiamma',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Crea una fiamma nella mano che produce luce. La fiamma può essere scagliata contro una creatura entro 9,144 metri, infliggendo 1d8 danni da fuoco.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 10,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_fire',
+                        'damage_type' => 'Fuoco',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -355,6 +1048,73 @@ return [
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Raggio di Gelo',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Un raggio gelido infligge 1d8 danni da freddo e riduce temporaneamente la velocità del bersaglio.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_cold',
+                        'damage_type' => 'Freddo',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -377,6 +1137,39 @@ return [
             'target_count' => 1,
             'can_target_self' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Resistenza',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Il bersaglio può aggiungere 1d4 a un tiro salvezza effettuato prima della fine dell’incantesimo.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'saving_throw',
+                        'modifier_type' => 'bonus',
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 4,
+                        'condition' => 'Un solo tiro salvezza scelto dal beneficiario, prima o dopo il tiro; poi l’incantesimo termina.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -395,6 +1188,73 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Fiamma Sacra',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Una luminosità sacra investe una creatura visibile. Se fallisce il tiro salvezza, subisce 1d8 danni radiosi.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_radiant',
+                        'damage_type' => 'Radioso',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -417,6 +1277,42 @@ return [
             'target_count' => 1,
             'can_target_objects' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Randello Incantato',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Potenzia magicamente un randello o bastone ferrato, permettendo di usare la caratteristica da incantatore e un dado di danno d8.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_bludgeoning',
+                        'damage_type' => 'Contundente',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'modifier_source_type' => 'caster_ability_modifier',
+                        'notes' => 'Dado base sostitutivo del randello o bastone ferrato. Si può scegliere di usare la caratteristica da incantatore al posto della Forza; non si aggiungono entrambe. Nessuna crescita dei dadi con il livello.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -434,6 +1330,81 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Stretta Folgorante',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Una scarica elettrica infligge 1d8 danni da fulmine e impedisce temporaneamente al bersaglio di effettuare reazioni.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_lightning',
+                        'damage_type' => 'Fulmine',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 8,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'advantage',
+                        'sort_order' => 1,
+                        'condition' => 'Solo il tiro per colpire di questo incantesimo se il bersaglio indossa un’armatura di metallo.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -448,6 +1419,27 @@ return [
         'target' => [
             'target_type' => 'creature',
             'target_count' => 1,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Risparmiare i Morenti',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Stabilizza una creatura vivente che possiede 0 punti ferita.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -464,6 +1456,29 @@ return [
         'target' => [
             'target_type' => 'special',
             'can_target_objects' => true,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Taumaturgia',
+                'application_type' => 'special',
+                'target_scope' => 'special',
+                'ends_with_source' => true,
+                'description' => 'Produce una piccola manifestazione soprannaturale, come amplificare la voce, alterare una fiamma o far tremare il terreno.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'minute',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 
@@ -484,6 +1499,88 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Frusta di Spine',
+                'application_type' => 'on_hit',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Una frusta vegetale infligge 1d6 danni perforanti e può trascinare una creatura Grande o più piccola verso l’incantatore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_piercing',
+                        'damage_type' => 'Perforante',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 6,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+                'forced_movements' => [
+                    [
+                        'key' => 'movement_1',
+                        'movement_type' => 'pull',
+                        'origin_type' => 'source',
+                        'direction_type' => 'toward_origin',
+                        'distance' => 3,
+                        'up_to_distance' => true,
+                        'straight_line' => true,
+                        'stops_at_obstacle' => true,
+                        'opportunity_attack_rule' => 'does_not_provoke',
+                        'sort_order' => 1,
+                        'condition' => 'Dopo il colpo, solo creatura Grande o inferiore; fino alla distanza indicata.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -502,6 +1599,37 @@ return [
             'target_count' => 1,
             'requires_sight' => true,
         ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Colpo Accurato',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Conferisce vantaggio al primo attacco effettuato contro il bersaglio nel turno successivo dell’incantatore.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'fixed',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'duration_value' => 1,
+                        'duration_unit' => 'round',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'advantage',
+                        'sort_order' => 1,
+                        'condition' => 'Solo il primo attacco contro il bersaglio nel turno successivo dell’incantatore, mantenendo concentrazione.',
+                    ],
+                ],
+            ],
+        ],
     ]),
 
     array_replace($defaults, [
@@ -519,6 +1647,100 @@ return [
             'target_type' => 'creature',
             'target_count' => 1,
             'requires_sight' => false,
+        ],
+
+        //Effetti strutturati: formule, condizioni e progressioni.
+        'effects' => [
+            [
+                'key' => 'spell_effect',
+                'name' => 'Beffa Crudele',
+                'application_type' => 'failed_save',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Un insulto incantato infligge 1d4 danni psichici e causa svantaggio al successivo attacco del bersaglio.',
+                'sort_order' => 1,
+                'durations' => [
+                    [
+                        'key' => 'spell_duration',
+                        'duration_type' => 'instantaneous',
+                        'notes' => 'Segue la durata e l’eventuale concentrazione dell’incantesimo; valgono le interruzioni specifiche e gli aumenti di durata con lo slot.',
+                        'sort_order' => 1,
+                    ],
+                ],
+                'damages' => [
+                    [
+                        'key' => 'damage_psychic',
+                        'damage_type' => 'Psichico',
+                        'is_primary' => true,
+                        'sort_order' => 1,
+                        'dice_count' => 1,
+                        'die_size' => 4,
+                        'flat_bonus' => 0,
+                        'scalings' => [
+                            [
+                                'key' => 'character_level_5_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 5,
+                                'maximum_source' => 10,
+                                'multiplier' => 0,
+                                'flat_value' => 2,
+                                'sort_order' => 1,
+                            ],
+                            [
+                                'key' => 'character_level_11_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 11,
+                                'maximum_source' => 16,
+                                'multiplier' => 0,
+                                'flat_value' => 3,
+                                'sort_order' => 2,
+                            ],
+                            [
+                                'key' => 'character_level_17_dice_count',
+                                'target_field' => 'dice_count',
+                                'source_type' => 'character_level',
+                                'operation' => 'set',
+                                'minimum_source' => 17,
+                                'maximum_source' => null,
+                                'multiplier' => 0,
+                                'flat_value' => 4,
+                                'sort_order' => 3,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'key' => 'spell_effect_2',
+                'name' => 'Attacco ostacolato',
+                'application_type' => 'special',
+                'target_scope' => 'target',
+                'ends_with_source' => true,
+                'description' => 'Un insulto incantato infligge 1d4 danni psichici e causa svantaggio al successivo attacco del bersaglio.',
+                'sort_order' => 2,
+                'condition' => 'Il prossimo tiro per colpire del bersaglio prima della fine del suo turno successivo, dopo il TS fallito.',
+                'roll_modifiers' => [
+                    [
+                        'roll_type' => 'attack',
+                        'modifier_type' => 'disadvantage',
+                        'sort_order' => 1,
+                        'condition' => 'Il prossimo tiro per colpire del bersaglio prima della fine del suo turno successivo, dopo il TS fallito.',
+                    ],
+                ],
+                'durations' => [
+                    [
+                        'key' => 'end_next_turn',
+                        'duration_type' => 'until_end_turn',
+                        'turn_reference' => 'target',
+                        'condition' => 'Fine del prossimo turno del bersaglio oppure consumo sul primo tiro ammesso.',
+                        'sort_order' => 1,
+                    ],
+                ],
+            ],
         ],
     ]),
 ];

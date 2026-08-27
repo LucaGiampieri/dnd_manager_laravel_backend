@@ -102,6 +102,14 @@ class Spell extends Model
                 ->each(function (EffectDefinition $effect): void {
                     $effect->delete();
                 });
+
+            //Elimina tramite i modelli anche le evocazioni, così
+            //vengono rimossi i relativi stat block dedicati
+            $spell->summons()
+                ->get()
+                ->each(function (SpellSummon $summon): void {
+                    $summon->delete();
+                });
         });
     }
 
@@ -187,6 +195,15 @@ class Spell extends Model
     {
         return $this->hasMany(
             SpellMaterialComponent::class
+        )->orderBy('sort_order');
+    }
+
+    //Relazione uno-a-molti:
+    //un incantesimo può definire una o più opzioni di evocazione
+    public function summons(): HasMany
+    {
+        return $this->hasMany(
+            SpellSummon::class
         )->orderBy('sort_order');
     }
 }
